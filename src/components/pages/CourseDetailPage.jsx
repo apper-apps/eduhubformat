@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { formatPrice } from "@/services/api/orderService";
 import { enrollInCourse } from "@/services/api/enrollmentService";
 import { getCourseById, getCohorts } from "@/services/api/courseService";
-import { getRelatedProducts, getRelatedCourses } from "@/services/api/recommendationService";
+import { getRelatedCourses } from "@/services/api/recommendationService";
 import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import Error from "@/components/ui/Error";
@@ -83,7 +83,6 @@ const [selectedCohort, setSelectedCohort] = useState(null);
   const [isEnrolling, setIsEnrolling] = useState(false);
   const [userEnrollment, setUserEnrollment] = useState(null);
   const [enrollmentLoading, setEnrollmentLoading] = useState(true);
-  const [relatedProducts, setRelatedProducts] = useState([]);
   const [relatedCourses, setRelatedCourses] = useState([]);
   const [recommendationsLoading, setRecommendationsLoading] = useState(true);
 useEffect(() => {
@@ -110,11 +109,7 @@ useEffect(() => {
     const loadRecommendations = async () => {
       try {
         setRecommendationsLoading(true);
-        const [productsData, coursesData] = await Promise.all([
-          getRelatedProducts(id),
-          getRelatedCourses(id)
-        ]);
-        setRelatedProducts(productsData);
+const coursesData = await getRelatedCourses(id);
         setRelatedCourses(coursesData);
       } catch (err) {
         console.error('Failed to load recommendations:', err);
@@ -359,411 +354,395 @@ const nextCohort = getNextCohort();
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Course Header */}
-            <div className="bg-white rounded-xl shadow-card p-6 lg:p-8">
+<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-8">
+          {/* Course Header */}
+          <div className="bg-white rounded-xl shadow-card p-8 lg:p-10">
+            <div className="space-y-8">
+              {/* Cover Image */}
+              <div className="aspect-video rounded-lg overflow-hidden">
+                <img
+                  src={course.coverImage}
+                  alt={course.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {/* Title and Badges */}
               <div className="space-y-6">
-                {/* Cover Image */}
-                <div className="aspect-video rounded-lg overflow-hidden">
-                  <img
-                    src={course.coverImage}
-                    alt={course.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* Title and Badges */}
-                <div className="space-y-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="primary">{course.category}</Badge>
-                    <Badge variant="secondary">{course.level}</Badge>
-                    {course.cohort && (
-                      <Badge variant="cohort">{course.cohort}</Badge>
-                    )}
-                  </div>
-
-                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 korean-text">
-                    {course.title}
-                  </h1>
-
-                  <div className="flex items-center space-x-6 text-sm text-gray-600">
-                    <div className="flex items-center space-x-2">
-                      <ApperIcon name="User" size={16} />
-                      <span>{course.instructor}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <ApperIcon name="Users" size={16} />
-                      <span>{course.students?.toLocaleString()}명 수강</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <ApperIcon name="Star" size={16} className="text-yellow-400 fill-current" />
-                      <span>{course.rating}</span>
-                    </div>
-</div>
-
-                  {/* Social Sharing */}
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <h4 className="text-sm font-medium text-gray-700">이 강의 공유하기</h4>
-                    <div className="flex items-center space-x-3">
-                      <button
-                        onClick={() => shareToFacebook(course)}
-                        className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors duration-200"
-                        title="페이스북에 공유"
-                      >
-                        <ApperIcon name="Facebook" size={16} />
-                      </button>
-                      <button
-                        onClick={() => shareToTwitter(course)}
-                        className="flex items-center justify-center w-8 h-8 bg-sky-500 text-white rounded-full hover:bg-sky-600 transition-colors duration-200"
-                        title="트위터에 공유"
-                      >
-                        <ApperIcon name="Twitter" size={16} />
-                      </button>
-                      <button
-                        onClick={() => shareToLinkedIn(course)}
-                        className="flex items-center justify-center w-8 h-8 bg-blue-700 text-white rounded-full hover:bg-blue-800 transition-colors duration-200"
-                        title="링크드인에 공유"
-                      >
-                        <ApperIcon name="Linkedin" size={16} />
-                      </button>
-                      <button
-                        onClick={() => shareToKakao(course)}
-                        className="flex items-center justify-center w-8 h-8 bg-yellow-400 text-gray-900 rounded-full hover:bg-yellow-500 transition-colors duration-200"
-                        title="카카오톡에 공유"
-                      >
-                        <ApperIcon name="MessageCircle" size={16} />
-                      </button>
-                      <button
-                        onClick={() => copyToClipboard(course)}
-                        className="flex items-center justify-center w-8 h-8 bg-gray-500 text-white rounded-full hover:bg-gray-600 transition-colors duration-200"
-                        title="링크 복사"
-                      >
-                        <ApperIcon name="Copy" size={16} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-</div>
-
-            {/* Course Tabs */}
-            <div className="bg-white rounded-xl shadow-card">
-              <div className="border-b border-gray-200">
-                <nav className="flex space-x-8 px-6">
-                  <button className="py-4 px-1 border-b-2 border-primary-500 font-medium text-sm text-primary-600">
-                    강의 소개
-                  </button>
-                  <button className="py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                    커리큘럼
-                  </button>
-                  <button className="py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                    수강후기
-                  </button>
-                  {userEnrollment && (
-                    <button className="py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 flex items-center space-x-2">
-                      <span>내 상태</span>
-                      {!enrollmentLoading && (
-                        <Badge 
-                          variant={userEnrollment.status === 'enrolled' ? 'default' : 'outline'}
-                          className={userEnrollment.status === 'enrolled' 
-                            ? 'bg-green-500 text-white' 
-                            : 'text-orange-600 border-orange-600'
-                          }
-                        >
-                          {userEnrollment.status === 'enrolled' ? '수강중' : '대기중'}
-                        </Badge>
-                      )}
-                    </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="primary">{course.category}</Badge>
+                  <Badge variant="secondary">{course.level}</Badge>
+                  {course.cohort && (
+                    <Badge variant="cohort">{course.cohort}</Badge>
                   )}
-                </nav>
-              </div>
-              
-<div className="p-6 lg:p-8">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">강의 소개</h2>
-                <p className="text-gray-700 korean-text leading-relaxed">
-                  {course.description}
-                </p>
-              </div>
-            </div>
+                </div>
 
-            {/* Learning Outcomes */}
-            <div className="bg-white rounded-xl shadow-card p-6 lg:p-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">학습 목표</h2>
-              <div className="space-y-3">
-                {learningOutcomes.map((outcome, index) => (
-                  <div key={index} className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center mt-0.5">
-                      <ApperIcon name="Check" size={14} className="text-primary-800" />
-                    </div>
-                    <span className="text-gray-700 korean-text">{outcome}</span>
+                <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 korean-text">
+                  {course.title}
+                </h1>
+
+                <div className="flex items-center space-x-6 text-sm text-gray-600">
+                  <div className="flex items-center space-x-2">
+                    <ApperIcon name="User" size={16} />
+                    <span>{course.instructor}</span>
                   </div>
-                ))}
-              </div>
-            </div>
+                  <div className="flex items-center space-x-2">
+                    <ApperIcon name="Users" size={16} />
+                    <span>{course.students?.toLocaleString()}명 수강</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <ApperIcon name="Star" size={16} className="text-yellow-400 fill-current" />
+                    <span>{course.rating}</span>
+                  </div>
+                </div>
 
-            {/* Curriculum */}
-            <div className="bg-white rounded-xl shadow-card p-6 lg:p-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">커리큘럼</h2>
-              <div className="space-y-4">
-{curriculum.map((week) => {
-                  const isOpen = openWeeks.has(week.week);
-                  const shouldLoadVideo = loadedVideos.has(week.week);
-                  const sanitizedUrl = sanitizeUrl(week.embed_url);
-                  
-                  return (
-                    <div 
-                      key={week.week}
-                      className={cn(
-                        "border border-gray-200 rounded-lg overflow-hidden transition-all duration-300",
-                        isOpen ? "border-primary-300 is-open" : "hover:border-primary-300"
-                      )}
+                {/* Social Sharing */}
+                <div className="flex items-center justify-between pt-6 border-t border-gray-100">
+                  <h4 className="text-sm font-medium text-gray-700">이 강의 공유하기</h4>
+                  <div className="flex items-center space-x-3">
+                    <button
+                      onClick={() => shareToFacebook(course)}
+                      className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors duration-200"
+                      title="페이스북에 공유"
                     >
-                      <div 
-                        className="p-4 cursor-pointer"
-                        onClick={() => toggleWeek(week.week)}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-3">
-                              <div className="flex-shrink-0 w-8 h-8 bg-primary-800 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                                {week.week}
-                              </div>
-                              <div>
-                                <h3 className="font-semibold text-gray-900">{week.title}</h3>
-                                <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
-                                  <span>{week.lessons}개 강의</span>
-                                  <span>{week.duration}</span>
-                                  {sanitizedUrl && (
-                                    <span className="text-primary-600">영상 포함</span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <ApperIcon 
-                            name="ChevronDown" 
-                            size={20} 
-                            className={cn(
-                              "text-gray-400 transition-transform duration-300",
-                              isOpen && "rotate-180"
-                            )} 
-                          />
-                        </div>
-                      </div>
-                      
-                      {/* Collapsible Content */}
-                      <div className={cn(
-                        "accordion-content",
-                        isOpen ? "accordion-open" : "accordion-closed"
-                      )}>
-                        <div className="px-4 pb-4">
-                          <div className="pt-2 border-t border-gray-100">
-                            {sanitizedUrl && shouldLoadVideo ? (
-                              <div className="mt-4">
-                                <iframe 
-                                  src={sanitizedUrl}
-                                  className="w-full aspect-video rounded-xl shadow"
-                                  frameBorder="0"
-                                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                  allowFullScreen
-                                  title={`${week.title} 강의 영상`}
-                                />
-                              </div>
-                            ) : sanitizedUrl ? (
-                              <div className="mt-4 flex items-center justify-center h-48 bg-gray-100 rounded-xl">
-                                <div className="text-center text-gray-500">
-                                  <ApperIcon name="Play" size={32} className="mx-auto mb-2" />
-                                  <p>영상을 로드하는 중...</p>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="mt-4 text-center text-gray-500 py-8">
-                                <ApperIcon name="Video" size={32} className="mx-auto mb-2" />
-                                <p>영상 준비 중입니다</p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                      <ApperIcon name="Facebook" size={16} />
+                    </button>
+                    <button
+                      onClick={() => shareToTwitter(course)}
+                      className="flex items-center justify-center w-8 h-8 bg-sky-500 text-white rounded-full hover:bg-sky-600 transition-colors duration-200"
+                      title="트위터에 공유"
+                    >
+                      <ApperIcon name="Twitter" size={16} />
+                    </button>
+                    <button
+                      onClick={() => shareToLinkedIn(course)}
+                      className="flex items-center justify-center w-8 h-8 bg-blue-700 text-white rounded-full hover:bg-blue-800 transition-colors duration-200"
+                      title="링크드인에 공유"
+                    >
+                      <ApperIcon name="Linkedin" size={16} />
+                    </button>
+                    <button
+                      onClick={() => shareToKakao(course)}
+                      className="flex items-center justify-center w-8 h-8 bg-yellow-400 text-gray-900 rounded-full hover:bg-yellow-500 transition-colors duration-200"
+                      title="카카오톡에 공유"
+                    >
+                      <ApperIcon name="MessageCircle" size={16} />
+                    </button>
+                    <button
+                      onClick={() => copyToClipboard(course)}
+                      className="flex items-center justify-center w-8 h-8 bg-gray-500 text-white rounded-full hover:bg-gray-600 transition-colors duration-200"
+                      title="링크 복사"
+                    >
+                      <ApperIcon name="Copy" size={16} />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Related Products Section */}
-          <RecommendationCarousel
-            title="관련 상품"
-            items={relatedProducts}
-            isLoading={recommendationsLoading}
-            itemType="product"
-            className="bg-gray-50"
-            itemsPerView={{ mobile: 1, tablet: 2, desktop: 3 }}
-          />
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-8 space-y-6">
-              {/* Enrollment Card */}
-{/* EnrollBox Section */}
-              <div className="bg-white rounded-xl shadow-card p-6">
+          {/* Enrollment Section */}
+          <div className="bg-white rounded-xl shadow-card p-8 lg:p-10">
+            <div className="space-y-8">
+              <div className="text-center">
+                <div className="text-4xl font-bold text-primary-800 mb-4">
+                  {formatPrice(course.price)}
+                </div>
+                <p className="text-lg text-gray-600">일시불 결제</p>
+              </div>
+
+              {/* D-day and Cohort Selection */}
+              {nextCohort && (
                 <div className="space-y-6">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-primary-800 mb-2">
-                      {formatPrice(course.price)}
+                  {/* D-day Display */}
+                  <div className="bg-primary-50 rounded-lg p-6 text-center">
+                    <div className="flex items-center justify-center space-x-2 mb-3">
+                      <ApperIcon name="Clock" size={24} className="text-primary-600" />
+                      <span className="text-2xl font-bold text-primary-800">
+                        ⏳ D-{calculateDDay(nextCohort.startDate)}
+                      </span>
                     </div>
-                    <p className="text-sm text-gray-600">일시불 결제</p>
+                    <p className="text-lg text-primary-600">
+                      {nextCohort.name} 시작까지
+                    </p>
                   </div>
 
-                  {/* D-day and Cohort Selection */}
-                  {nextCohort && (
-                    <div className="space-y-4">
-                      {/* D-day Display */}
-                      <div className="bg-primary-50 rounded-lg p-4 text-center">
-                        <div className="flex items-center justify-center space-x-2 mb-2">
-                          <ApperIcon name="Clock" size={20} className="text-primary-600" />
-                          <span className="text-lg font-bold text-primary-800">
-                            ⏳ D-{calculateDDay(nextCohort.startDate)}
-                          </span>
-                        </div>
-                        <p className="text-sm text-primary-600">
-                          {nextCohort.name} 시작까지
-                        </p>
-                      </div>
+                  {/* Cohort Dropdown */}
+                  <div className="space-y-3">
+                    <label className="block text-lg font-medium text-gray-700">기수 선택</label>
+                    <div className="relative">
+                      <select 
+                        value={selectedCohort?.id || ''} 
+                        onChange={(e) => {
+                          const cohortId = parseInt(e.target.value);
+                          const cohort = cohorts.find(c => c.id === cohortId);
+                          setSelectedCohort(cohort);
+                        }}
+                        className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
+                      >
+                        <option value="">기수를 선택하세요</option>
+                        {cohorts.map((cohort) => {
+                          const spotsLeft = cohort.capacity - cohort.enrolled;
+                          return (
+                            <option key={cohort.id} value={cohort.id}>
+                              {cohort.name} ({new Date(cohort.startDate).toLocaleDateString('ko-KR')}) - 잔여 {spotsLeft}석
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
+                  </div>
 
-                      {/* Cohort Dropdown */}
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">기수 선택</label>
-                        <div className="relative">
-                          <select 
-                            value={selectedCohort?.id || ''} 
-                            onChange={(e) => {
-                              const cohortId = parseInt(e.target.value);
-                              const cohort = cohorts.find(c => c.id === cohortId);
-                              setSelectedCohort(cohort);
-                            }}
-                            className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
-                          >
-                            <option value="">기수를 선택하세요</option>
-                            {cohorts.map((cohort) => {
-                              const spotsLeft = cohort.capacity - cohort.enrolled;
-                              return (
-                                <option key={cohort.id} value={cohort.id}>
-                                  {cohort.name} ({new Date(cohort.startDate).toLocaleDateString('ko-KR')}) - 잔여 {spotsLeft}석
-                                </option>
-                              );
-                            })}
-                          </select>
+                  {/* Selected Cohort Info */}
+                  {selectedCohort && (
+                    <div className="bg-gray-50 rounded-lg p-6">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="text-lg font-semibold text-gray-900">{selectedCohort.name}</h4>
+                        {selectedCohort.capacity - selectedCohort.enrolled === 0 && (
+                          <Badge variant="outline" className="text-orange-600 border-orange-600">
+                            Full
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="text-base text-gray-600 space-y-2">
+                        <p>시작일: {new Date(selectedCohort.startDate).toLocaleDateString('ko-KR')}</p>
+                        <div className="flex justify-between">
+                          <span>잔여석: {selectedCohort.capacity - selectedCohort.enrolled}명</span>
+                          <span>총 {selectedCohort.capacity}명</span>
                         </div>
                       </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
-                      {/* Selected Cohort Info */}
-                      {selectedCohort && (
-                        <div className="bg-gray-50 rounded-lg p-4">
-                          <div className="flex justify-between items-center mb-2">
-                            <h4 className="font-semibold text-gray-900">{selectedCohort.name}</h4>
-                            {selectedCohort.capacity - selectedCohort.enrolled === 0 && (
-                              <Badge variant="outline" className="text-orange-600 border-orange-600">
-                                Full
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="text-sm text-gray-600 space-y-1">
-                            <p>시작일: {new Date(selectedCohort.startDate).toLocaleDateString('ko-KR')}</p>
-                            <div className="flex justify-between">
-                              <span>잔여석: {selectedCohort.capacity - selectedCohort.enrolled}명</span>
-                              <span>총 {selectedCohort.capacity}명</span>
+              <Button 
+                onClick={() => {
+                  if (!selectedCohort) {
+                    toast.error('기수를 선택해주세요.');
+                    return;
+                  }
+                  setShowEnrollmentModal(true);
+                }}
+                className={cn(
+                  "w-full text-xl py-6",
+                  selectedCohort && selectedCohort.capacity - selectedCohort.enrolled > 0 
+                    ? "btn-primary" 
+                    : "bg-orange-500 hover:bg-orange-600 text-white font-semibold"
+                )}
+                disabled={!selectedCohort}
+              >
+                {!selectedCohort 
+                  ? "기수를 선택하세요"
+                  : selectedCohort.capacity - selectedCohort.enrolled > 0 
+                    ? "수강 신청" 
+                    : "대기 신청"
+                }
+              </Button>
+
+              {/* Review Button for Enrolled Users */}
+              {userEnrollment && userEnrollment.status === 'enrolled' && (
+                <Button 
+                  variant="outline"
+                  className="w-full mt-4 text-lg py-4"
+                  onClick={() => {
+                    // Navigate to review form with course context
+                    window.location.href = `/review/create?type=course&itemId=${course.Id}&title=${encodeURIComponent(course.title)}`;
+                  }}
+                >
+                  <ApperIcon name="Star" size={18} className="mr-2" />
+                  후기 작성
+                </Button>
+              )}
+
+              <div className="text-center text-base text-gray-600">
+                <p>30일 무조건 환불보장</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Course Tabs */}
+          <div className="bg-white rounded-xl shadow-card">
+            <div className="border-b border-gray-200">
+              <nav className="flex space-x-8 px-8">
+                <button className="py-4 px-1 border-b-2 border-primary-500 font-medium text-base text-primary-600">
+                  강의 소개
+                </button>
+                <button className="py-4 px-1 border-b-2 border-transparent font-medium text-base text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                  커리큘럼
+                </button>
+                <button className="py-4 px-1 border-b-2 border-transparent font-medium text-base text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                  수강후기
+                </button>
+                {userEnrollment && (
+                  <button className="py-4 px-1 border-b-2 border-transparent font-medium text-base text-gray-500 hover:text-gray-700 hover:border-gray-300 flex items-center space-x-2">
+                    <span>내 상태</span>
+                    {!enrollmentLoading && (
+                      <Badge 
+                        variant={userEnrollment.status === 'enrolled' ? 'default' : 'outline'}
+                        className={userEnrollment.status === 'enrolled' 
+                          ? 'bg-green-500 text-white' 
+                          : 'text-orange-600 border-orange-600'
+                        }
+                      >
+                        {userEnrollment.status === 'enrolled' ? '수강중' : '대기중'}
+                      </Badge>
+                    )}
+                  </button>
+                )}
+              </nav>
+            </div>
+            
+            <div className="p-8 lg:p-10">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">강의 소개</h2>
+              <p className="text-lg text-gray-700 korean-text leading-relaxed">
+                {course.description}
+              </p>
+            </div>
+          </div>
+
+          {/* Learning Outcomes */}
+          <div className="bg-white rounded-xl shadow-card p-8 lg:p-10">
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">학습 목표</h2>
+            <div className="space-y-4">
+              {learningOutcomes.map((outcome, index) => (
+                <div key={index} className="flex items-start space-x-4">
+                  <div className="flex-shrink-0 w-7 h-7 bg-primary-100 rounded-full flex items-center justify-center mt-1">
+                    <ApperIcon name="Check" size={16} className="text-primary-800" />
+                  </div>
+                  <span className="text-lg text-gray-700 korean-text">{outcome}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Course Info */}
+          <div className="bg-white rounded-xl shadow-card p-8 lg:p-10">
+            <h3 className="text-2xl font-bold text-gray-900 mb-8">강의 정보</h3>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between py-4 border-b border-gray-100">
+                <span className="text-lg text-gray-600">수강 기간</span>
+                <span className="text-lg font-semibold text-gray-900">{course.duration}</span>
+              </div>
+              <div className="flex items-center justify-between py-4 border-b border-gray-100">
+                <span className="text-lg text-gray-600">난이도</span>
+                <Badge variant="secondary" size="small">{course.level}</Badge>
+              </div>
+              <div className="flex items-center justify-between py-4 border-b border-gray-100">
+                <span className="text-lg text-gray-600">수강생</span>
+                <span className="text-lg font-semibold text-gray-900">{course.students?.toLocaleString()}명</span>
+              </div>
+              <div className="flex items-center justify-between py-4">
+                <span className="text-lg text-gray-600">평점</span>
+                <div className="flex items-center space-x-2">
+                  <ApperIcon name="Star" size={18} className="text-yellow-400 fill-current" />
+                  <span className="text-lg font-semibold text-gray-900">{course.rating}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Curriculum */}
+          <div className="bg-white rounded-xl shadow-card p-8 lg:p-10">
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">커리큘럼</h2>
+            <div className="space-y-6">
+              {curriculum.map((week) => {
+                const isOpen = openWeeks.has(week.week);
+                const shouldLoadVideo = loadedVideos.has(week.week);
+                const sanitizedUrl = sanitizeUrl(week.embed_url);
+                
+                return (
+                  <div 
+                    key={week.week}
+                    className={cn(
+                      "border border-gray-200 rounded-lg overflow-hidden transition-all duration-300",
+                      isOpen ? "border-primary-300 is-open" : "hover:border-primary-300"
+                    )}
+                  >
+                    <div 
+                      className="p-6 cursor-pointer"
+                      onClick={() => toggleWeek(week.week)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-4">
+                            <div className="flex-shrink-0 w-10 h-10 bg-primary-800 text-white rounded-full flex items-center justify-center text-lg font-bold">
+                              {week.week}
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-semibold text-gray-900">{week.title}</h3>
+                              <div className="flex items-center space-x-6 text-base text-gray-600 mt-2">
+                                <span>{week.lessons}개 강의</span>
+                                <span>{week.duration}</span>
+                                {sanitizedUrl && (
+                                  <span className="text-primary-600">영상 포함</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
-                      )}
+                        <ApperIcon 
+                          name="ChevronDown" 
+                          size={24} 
+                          className={cn(
+                            "text-gray-400 transition-transform duration-300",
+                            isOpen && "rotate-180"
+                          )} 
+                        />
+                      </div>
                     </div>
-                  )}
-
-                  <Button 
-                    onClick={() => {
-                      if (!selectedCohort) {
-                        toast.error('기수를 선택해주세요.');
-                        return;
-                      }
-                      setShowEnrollmentModal(true);
-                    }}
-                    className={cn(
-                      "w-full text-lg py-4",
-                      selectedCohort && selectedCohort.capacity - selectedCohort.enrolled > 0 
-                        ? "btn-primary" 
-                        : "bg-orange-500 hover:bg-orange-600 text-white font-semibold"
-                    )}
-                    disabled={!selectedCohort}
-                  >
-{!selectedCohort 
-                      ? "기수를 선택하세요"
-                      : selectedCohort.capacity - selectedCohort.enrolled > 0 
-                        ? "수강 신청" 
-                        : "대기 신청"
-                    }
-                  </Button>
-                  {/* Review Button for Enrolled Users */}
-                  {userEnrollment && userEnrollment.status === 'enrolled' && (
-                    <Button 
-                      variant="outline"
-                      className="w-full mt-3"
-                      onClick={() => {
-                        // Navigate to review form with course context
-                        window.location.href = `/review/create?type=course&itemId=${course.Id}&title=${encodeURIComponent(course.title)}`;
-                      }}
-                    >
-                      <ApperIcon name="Star" size={16} className="mr-2" />
-                      후기 작성
-                    </Button>
-                  )}
-
-                  <div className="text-center text-sm text-gray-600">
-                    <p>30일 무조건 환불보장</p>
-                  </div>
-                </div>
-              </div>
-              {/* Course Info */}
-              <div className="bg-white rounded-xl shadow-card p-6">
-                <h3 className="font-bold text-gray-900 mb-4">강의 정보</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                    <span className="text-gray-600">수강 기간</span>
-                    <span className="font-semibold text-gray-900">{course.duration}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                    <span className="text-gray-600">난이도</span>
-                    <Badge variant="secondary" size="small">{course.level}</Badge>
-                  </div>
-                  <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                    <span className="text-gray-600">수강생</span>
-                    <span className="font-semibold text-gray-900">{course.students?.toLocaleString()}명</span>
-                  </div>
-                  <div className="flex items-center justify-between py-2">
-                    <span className="text-gray-600">평점</span>
-                    <div className="flex items-center space-x-1">
-                      <ApperIcon name="Star" size={16} className="text-yellow-400 fill-current" />
-                      <span className="font-semibold text-gray-900">{course.rating}</span>
+                    
+                    {/* Collapsible Content */}
+                    <div className={cn(
+                      "accordion-content",
+                      isOpen ? "accordion-open" : "accordion-closed"
+                    )}>
+                      <div className="px-6 pb-6">
+                        <div className="pt-4 border-t border-gray-100">
+                          {sanitizedUrl && shouldLoadVideo ? (
+                            <div className="mt-6">
+                              <iframe 
+                                src={sanitizedUrl}
+                                className="w-full aspect-video rounded-xl shadow"
+                                frameBorder="0"
+                                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                                title={`${week.title} 강의 영상`}
+                              />
+                            </div>
+                          ) : sanitizedUrl ? (
+                            <div className="mt-6 flex items-center justify-center h-56 bg-gray-100 rounded-xl">
+                              <div className="text-center text-gray-500">
+                                <ApperIcon name="Play" size={40} className="mx-auto mb-3" />
+                                <p className="text-lg">영상을 로드하는 중...</p>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="mt-6 text-center text-gray-500 py-12">
+                              <ApperIcon name="Video" size={40} className="mx-auto mb-3" />
+                              <p className="text-lg">영상 준비 중입니다</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* Countdown */}
-{nextCohort && daysLeft > 0 && (
-                <div className="bg-gradient-to-r from-primary-800 to-accent-500 rounded-xl shadow-card p-6 text-white">
-<div className="text-center">
-                    <h3 className="font-bold mb-2">{nextCohort.name} 시작까지</h3>
-                    <div className="text-3xl font-bold mb-2">D-{daysLeft}</div>
-                    <p className="text-sm opacity-90">지금 신청하고 얼리버드 혜택을 받으세요!</p>
-                  </div>
-                </div>
-              )}
+                );
+              })}
             </div>
-</div>
+          </div>
+
+          {/* Countdown */}
+          {nextCohort && daysLeft > 0 && (
+            <div className="bg-gradient-to-r from-primary-800 to-accent-500 rounded-xl shadow-card p-8 lg:p-10 text-white">
+              <div className="text-center">
+                <h3 className="text-xl font-bold mb-4">{nextCohort.name} 시작까지</h3>
+                <div className="text-5xl font-bold mb-4">D-{daysLeft}</div>
+                <p className="text-lg opacity-90">지금 신청하고 얼리버드 혜택을 받으세요!</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

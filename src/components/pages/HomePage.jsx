@@ -70,11 +70,11 @@ const HomePage = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 korean-text">
+>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 korean-text">
               왜 <span className="text-gradient">EduHub Pro</span>를 선택해야 할까요?
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto korean-text">
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto korean-text">
               최고의 학습 경험을 제공하기 위해 끊임없이 노력하고 있습니다.
             </p>
           </motion.div>
@@ -188,7 +188,7 @@ const HomePage = () => {
             transition={{ duration: 0.6, delay: 0.4 }}
             viewport={{ once: true }}
           >
-            <Button variant="gradient" size="large">
+<Button variant="gradient" size="large" className="touch-manipulation min-h-[48px]">
               <ApperIcon name="ArrowRight" size={20} className="mr-2" />
               모든 강의 보기
             </Button>

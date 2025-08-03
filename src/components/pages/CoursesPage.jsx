@@ -7,8 +7,8 @@ const CoursesPage = () => {
   return (
     <div className="min-h-screen bg-stone-50">
       {/* Page Header */}
-      <section className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<section className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
           <motion.div
             className="text-center space-y-4"
             initial={{ opacity: 0, y: 20 }}
@@ -47,7 +47,7 @@ const CoursesPage = () => {
       </section>
 
       {/* Course Grid Section */}
-      <section className="py-12">
+<section className="py-8 md:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -82,7 +82,7 @@ const CoursesPage = () => {
                   placeholder="이메일 주소를 입력하세요"
                   className="w-full px-4 py-3 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-white/50 text-gray-900"
                 />
-                <button className="w-full sm:w-auto bg-white text-primary-800 font-semibold px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors duration-200 whitespace-nowrap">
+<button className="w-full sm:w-auto bg-white text-primary-800 font-semibold px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors duration-200 whitespace-nowrap touch-manipulation min-h-[44px]">
                   구독하기
                 </button>
               </div>

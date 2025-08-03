@@ -265,11 +265,38 @@ a:focus {
 @media (max-width: 768px) {
   .touch-manipulation {
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
   
   /* Improve tap target sizes for mobile */
-  button, select, input {
+  button, select, input, a {
     min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Enhanced touch feedback */
+  .touch-manipulation:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+  
+  /* Prevent text selection on buttons */
+  button {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Optimize scrolling */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  /* Mobile-specific padding adjustments */
+  .mobile-safe-padding {
+    padding-bottom: max(env(safe-area-inset-bottom), 16px);
   }
 }
 
@@ -277,5 +304,43 @@ a:focus {
 @media (min-width: 769px) {
   .group:hover .group-hover\:scale-105 {
     transform: scale(1.05);
+  }
+  
+  /* Enhanced desktop interactions */
+  .hover\:shadow-lg:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+}
+
+/* Swipe gesture styles */
+.swipe-container {
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile navigation enhancements */
+@media (max-width: 768px) {
+  .mobile-nav-menu {
+    touch-action: manipulation;
+  }
+  
+  .mobile-nav-overlay {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+}
+
+/* Sticky elements mobile optimization */
+.sticky-mobile {
+  position: -webkit-sticky;
+  position: sticky;
+  z-index: 1000;
+}
+
+/* Enhanced focus states for accessibility */
+@media (max-width: 768px) {
+  *:focus {
+    outline: 3px solid #8B5CF6;
+    outline-offset: 2px;
   }
 }

@@ -5,9 +5,9 @@ import CartSidebar from "@/components/organisms/CartSidebar";
 
 const Layout = () => {
   return (
-    <div className="min-h-screen bg-stone-50">
+<div className="min-h-screen bg-stone-50">
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 pb-safe mobile-safe-padding">
         <Outlet />
       </main>
       <CartSidebar />

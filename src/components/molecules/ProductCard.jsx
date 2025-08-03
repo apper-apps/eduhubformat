@@ -24,9 +24,9 @@ const ProductCard = ({ product, className, ...props }) => {
   };
 
   return (
-    <div
+<div
       className={cn(
-        "card-elevated group cursor-pointer overflow-hidden",
+        "card-elevated group cursor-pointer overflow-hidden touch-manipulation active:scale-[0.98] transition-all duration-300",
         className
       )}
       {...props}
@@ -42,7 +42,7 @@ const ProductCard = ({ product, className, ...props }) => {
           
           {/* Discount Badge */}
           {product.originalPrice && (
-            <div className="absolute top-3 left-3">
+            <div className="absolute top-2 left-2 md:top-3 md:left-3">
               <Badge variant="destructive" className="text-xs">
                 {Math.round((1 - product.price / product.originalPrice) * 100)}% 할인
               </Badge>
@@ -59,9 +59,9 @@ const ProductCard = ({ product, className, ...props }) => {
           )}
           
           {/* Category Badge */}
-          <div className="absolute top-3 right-3">
+          <div className="absolute top-2 right-2 md:top-3 md:right-3">
             <span className={cn(
-              "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
+              "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium backdrop-blur-sm",
               getCategoryColor(product.category)
             )}>
               {product.category}

@@ -1,13 +1,13 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { getProducts, searchProducts, getProductsByCategory } from "@/services/api/productService";
+import { getProducts, getProductsByCategory, searchProducts } from "@/services/api/productService";
+import { cn } from "@/utils/cn";
+import ApperIcon from "@/components/ApperIcon";
 import ProductCard from "@/components/molecules/ProductCard";
 import Loading from "@/components/ui/Loading";
 import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
 import Button from "@/components/atoms/Button";
-import ApperIcon from "@/components/ApperIcon";
 
 const StorePage = () => {
   const [products, setProducts] = useState([]);
@@ -132,11 +132,11 @@ useEffect(() => {
                 placeholder="상품을 검색하세요..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-base"
+                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-base touch-manipulation min-h-[48px]"
               />
             </div>
 
-            {/* Category Filter Tabs - Mobile Optimized */}
+            {/* Category Filter Chips - Mobile Optimized */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-700">카테고리</span>
@@ -145,22 +145,29 @@ useEffect(() => {
                 </span>
               </div>
               
-              {/* Mobile: Horizontal Scroll Categories */}
-              <div className="flex overflow-x-auto scrollbar-hide space-x-3 pb-2 sm:pb-0 sm:flex-wrap sm:overflow-visible">
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => handleCategoryChange(category)}
-                    className={`flex-shrink-0 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 transform active:scale-95 touch-manipulation ${
-                      selectedCategory === category
-                        ? 'bg-primary-800 text-white shadow-lg'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300'
-                    }`}
-                    style={{ minWidth: '80px' }}
-                  >
-                    {category}
-                  </button>
-                ))}
+              {/* Mobile: Horizontal Scroll Categories with Touch-Friendly Design */}
+              <div className="relative">
+                <div className="flex overflow-x-auto scrollbar-hide space-x-3 pb-3 md:pb-0 md:flex-wrap md:overflow-visible">
+                  {categories.map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => handleCategoryChange(category)}
+                      className={cn(
+                        "flex-shrink-0 px-5 py-3 rounded-full text-sm font-medium transition-all duration-200 transform touch-manipulation min-h-[44px] whitespace-nowrap",
+                        "active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2",
+                        selectedCategory === category
+                          ? 'bg-primary-800 text-white shadow-lg ring-2 ring-primary-300'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300 hover:shadow-md'
+                      )}
+                      style={{ minWidth: '80px' }}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+                
+                {/* Fade indicators for scroll */}
+                <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden" />
               </div>
             </div>
 
@@ -168,9 +175,9 @@ useEffect(() => {
             <div className="flex items-center justify-between sm:justify-start sm:space-x-4">
               <span className="text-sm font-medium text-gray-700">정렬</span>
               <select
-                value={sortBy}
+value={sortBy}
                 onChange={(e) => handleSortChange(e.target.value)}
-                className="border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white min-w-[140px]"
+                className="border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white min-w-[140px] touch-manipulation min-h-[44px]"
               >
                 {sortOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -216,7 +223,7 @@ useEffect(() => {
 
               {/* Products Grid */}
               <motion.div
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
@@ -227,8 +234,12 @@ useEffect(() => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.1 * index }}
+                    className="touch-manipulation"
                   >
-                    <ProductCard product={product} />
+                    <ProductCard 
+                      product={product} 
+                      className="h-full hover:shadow-lg transition-all duration-300 active:scale-[0.98]"
+                    />
                   </motion.div>
                 ))}
               </motion.div>

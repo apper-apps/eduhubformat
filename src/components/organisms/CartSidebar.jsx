@@ -62,8 +62,8 @@ const CartSidebar = () => {
                 장바구니 ({totalQuantity})
               </h2>
               <button
-                onClick={() => dispatch(closeCart())}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+onClick={() => dispatch(closeCart())}
+                className="p-3 hover:bg-gray-100 rounded-full transition-colors touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 <ApperIcon name="X" size={20} />
               </button>
@@ -114,9 +114,9 @@ const CartSidebar = () => {
                           </span>
                           
                           <div className="flex items-center space-x-2">
-                            <button
+<button
                               onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                              className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-300 hover:bg-gray-50"
+                              className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-300 hover:bg-gray-50 touch-manipulation"
                             >
                               <ApperIcon name="Minus" size={14} />
                             </button>
@@ -127,7 +127,7 @@ const CartSidebar = () => {
                             
                             <button
                               onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                              className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-300 hover:bg-gray-50"
+                              className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-300 hover:bg-gray-50 touch-manipulation"
                             >
                               <ApperIcon name="Plus" size={14} />
                             </button>
@@ -135,9 +135,9 @@ const CartSidebar = () => {
                         </div>
                       </div>
                       
-                      <button
+<button
                         onClick={() => dispatch(removeFromCart(item.id))}
-                        className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                        className="p-3 text-gray-400 hover:text-red-500 transition-colors touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
                       >
                         <ApperIcon name="Trash2" size={16} />
                       </button>
@@ -158,11 +158,11 @@ const CartSidebar = () => {
                 </div>
                 
                 <div className="flex space-x-3">
-                  <Button
+<Button
                     variant="ghost"
                     size="small"
                     onClick={() => dispatch(clearCart())}
-                    className="flex-1"
+                    className="flex-1 touch-manipulation min-h-[48px]"
                   >
                     전체 삭제
                   </Button>
@@ -171,7 +171,7 @@ const CartSidebar = () => {
                     variant="gradient"
                     size="small"
                     onClick={handleCheckout}
-                    className="flex-1"
+                    className="flex-1 touch-manipulation min-h-[48px]"
                   >
                     결제하기
                   </Button>

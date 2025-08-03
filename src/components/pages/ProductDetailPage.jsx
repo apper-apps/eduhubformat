@@ -23,6 +23,9 @@ const ProductDetailPage = () => {
   const [error, setError] = useState(null);
 const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariants, setSelectedVariants] = useState({});
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [frequentlyBought, setFrequentlyBought] = useState([]);
   const [recommendationsLoading, setRecommendationsLoading] = useState(true);
@@ -158,32 +161,88 @@ const handleAddToCart = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Product Images */}
-          <motion.div
+<motion.div
             className="space-y-4"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
           >
-            {/* Main Image */}
-            <div className="aspect-square overflow-hidden rounded-lg bg-gray-100">
+            {/* Main Image with Touch Gestures */}
+            <div 
+              className="relative aspect-square overflow-hidden rounded-lg bg-gray-100 cursor-pointer"
+              onTouchStart={(e) => {
+                setTouchEnd(0);
+                setTouchStart(e.targetTouches[0].clientX);
+              }}
+              onTouchMove={(e) => {
+                setTouchEnd(e.targetTouches[0].clientX);
+              }}
+              onTouchEnd={() => {
+                if (!touchStart || !touchEnd) return;
+                const distance = touchStart - touchEnd;
+                const isLeftSwipe = distance > 50;
+                const isRightSwipe = distance < -50;
+
+                if (isLeftSwipe && selectedImage < product.images.length - 1) {
+                  setSelectedImage(prev => prev + 1);
+                }
+                if (isRightSwipe && selectedImage > 0) {
+                  setSelectedImage(prev => prev - 1);
+                }
+              }}
+              onDoubleClick={() => setIsZoomed(!isZoomed)}
+            >
               <img
                 src={product.images[selectedImage]}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className={cn(
+                  "w-full h-full object-cover transition-transform duration-300",
+                  isZoomed ? "scale-150" : "scale-100"
+                )}
               />
+              
+              {/* Navigation Arrows for Desktop */}
+              {product.images.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setSelectedImage(prev => Math.max(0, prev - 1))}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hidden md:flex items-center justify-center"
+                    disabled={selectedImage === 0}
+                  >
+                    <ApperIcon name="ChevronLeft" size={20} />
+                  </button>
+                  <button
+                    onClick={() => setSelectedImage(prev => Math.min(product.images.length - 1, prev + 1))}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hidden md:flex items-center justify-center"
+                    disabled={selectedImage === product.images.length - 1}
+                  >
+                    <ApperIcon name="ChevronRight" size={20} />
+                  </button>
+                </>
+              )}
+
+              {/* Image Counter */}
+              <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-sm">
+                {selectedImage + 1} / {product.images.length}
+              </div>
+
+              {/* Zoom Indicator */}
+              <div className="absolute top-2 right-2 bg-black/50 text-white p-1 rounded text-xs md:hidden">
+                탭하여 확대
+              </div>
             </div>
 
-            {/* Thumbnail Images */}
+            {/* Thumbnail Images - Horizontal Scroll on Mobile */}
             {product.images.length > 1 && (
-              <div className="flex space-x-2">
+              <div className="flex space-x-2 overflow-x-auto scrollbar-hide pb-2">
                 {product.images.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
                     className={cn(
-                      "w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-200",
+                      "flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border-2 transition-all duration-200 touch-manipulation",
                       selectedImage === index
-                        ? "border-primary-800"
+                        ? "border-primary-800 scale-110"
                         : "border-gray-200 hover:border-gray-300"
                     )}
                   >
@@ -193,6 +252,23 @@ const handleAddToCart = () => {
                       className="w-full h-full object-cover"
                     />
                   </button>
+                ))}
+              </div>
+            )}
+
+            {/* Swipe Indicators for Mobile */}
+            {product.images.length > 1 && (
+              <div className="flex justify-center space-x-1 md:hidden">
+                {product.images.map((_, index) => (
+                  <div
+                    key={index}
+                    className={cn(
+                      "w-2 h-2 rounded-full transition-all duration-200",
+                      selectedImage === index
+                        ? "bg-primary-600 w-6"
+                        : "bg-gray-300"
+                    )}
+                  />
                 ))}
               </div>
             )}
@@ -293,15 +369,15 @@ const handleAddToCart = () => {
                       색상
                     </label>
                     <div className="flex space-x-2">
-                      {product.variants.colors.map((color) => (
+{product.variants.colors.map((color) => (
                         <button
                           key={color}
                           onClick={() => handleVariantChange('color', color)}
                           className={cn(
-                            "px-4 py-2 border rounded-lg text-sm font-medium transition-all duration-200",
+                            "px-4 py-3 border rounded-lg text-sm font-medium transition-all duration-200 touch-manipulation min-h-[44px]",
                             selectedVariants.color === color
                               ? "border-primary-800 bg-primary-50 text-primary-800"
-                              : "border-gray-300 hover:border-gray-400"
+                              : "border-gray-300 hover:border-gray-400 active:bg-gray-50"
                           )}
                         >
                           {color}
@@ -311,7 +387,7 @@ const handleAddToCart = () => {
                   </div>
                 )}
 
-                {product.variants.sizes && (
+{product.variants.sizes && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       사이즈
@@ -322,10 +398,10 @@ const handleAddToCart = () => {
                           key={size}
                           onClick={() => handleVariantChange('size', size)}
                           className={cn(
-                            "px-4 py-2 border rounded-lg text-sm font-medium transition-all duration-200",
+                            "px-4 py-3 border rounded-lg text-sm font-medium transition-all duration-200 touch-manipulation min-h-[44px]",
                             selectedVariants.size === size
                               ? "border-primary-800 bg-primary-50 text-primary-800"
-                              : "border-gray-300 hover:border-gray-400"
+                              : "border-gray-300 hover:border-gray-400 active:bg-gray-50"
                           )}
                         >
                           {size}
@@ -335,21 +411,21 @@ const handleAddToCart = () => {
                   </div>
                 )}
 
-                {product.variants.switches && (
+{product.variants.switches && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       스위치
                     </label>
-                    <div className="flex space-x-2">
+                    <div className="flex flex-wrap gap-2">
                       {product.variants.switches.map((switchType) => (
                         <button
                           key={switchType}
                           onClick={() => handleVariantChange('switch', switchType)}
                           className={cn(
-                            "px-4 py-2 border rounded-lg text-sm font-medium transition-all duration-200",
+                            "px-4 py-3 border rounded-lg text-sm font-medium transition-all duration-200 touch-manipulation min-h-[44px]",
                             selectedVariants.switch === switchType
                               ? "border-primary-800 bg-primary-50 text-primary-800"
-                              : "border-gray-300 hover:border-gray-400"
+                              : "border-gray-300 hover:border-gray-400 active:bg-gray-50"
                           )}
                         >
                           {switchType}
@@ -362,14 +438,14 @@ const handleAddToCart = () => {
             )}
 
             {/* Quantity */}
-            <div>
+<div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 수량
               </label>
               <div className="flex items-center space-x-3">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
                   disabled={quantity <= 1}
                 >
                   <ApperIcon name="Minus" size={16} />
@@ -379,7 +455,7 @@ const handleAddToCart = () => {
                 </span>
                 <button
                   onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                  className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
                   disabled={quantity >= product.stock || !product.isInStock}
                 >
                   <ApperIcon name="Plus" size={16} />
@@ -388,14 +464,14 @@ const handleAddToCart = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="space-y-3">
+<div className="space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Button
                   onClick={handleAddToCart}
                   variant="outline"
                   size="large"
                   disabled={!product.isInStock}
-                  className="flex items-center justify-center space-x-2"
+                  className="flex items-center justify-center space-x-2 touch-manipulation min-h-[48px]"
                 >
                   <ApperIcon name="ShoppingCart" size={20} />
                   <span>장바구니 담기</span>
@@ -405,18 +481,18 @@ const handleAddToCart = () => {
                   variant="primary"
                   size="large"
                   disabled={!product.isInStock}
-                  className="flex items-center justify-center space-x-2"
+                  className="flex items-center justify-center space-x-2 touch-manipulation min-h-[48px]"
                 >
                   <ApperIcon name="CreditCard" size={20} />
                   <span>바로구매</span>
                 </Button>
-</div>
+              </div>
               
               {/* Review Button for Purchased Products */}
               <Button
                 variant="outline"
                 size="large"
-                className="w-full flex items-center justify-center space-x-2 mt-3"
+                className="w-full flex items-center justify-center space-x-2 mt-3 touch-manipulation min-h-[48px]"
                 onClick={() => {
                   // Navigate to review form with product context
                   window.location.href = `/review/create?type=product&itemId=${product.Id}&title=${encodeURIComponent(product.name)}`;
@@ -501,83 +577,97 @@ const handleAddToCart = () => {
       </div>
 
       {/* Mobile Sticky Checkout Bar */}
+{/* Mobile Sticky Checkout Bar */}
       <motion.div
-        className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 px-4 py-3 shadow-elevated z-50 lg:hidden"
+        className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-elevated z-50 lg:hidden"
         initial={{ opacity: 0, y: 100 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.8 }}
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 16px)' }}
       >
-        <div className="flex items-center space-x-3">
-          {/* Product Image */}
-          <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-            <img
-              src={product.images[0]}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          {/* Product Info */}
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-medium text-gray-900 truncate">
-              {product.name}
-            </h3>
-            <div className="flex items-center space-x-2">
-              <span className="text-lg font-bold text-primary-800">
-                {formatPrice(product.price * quantity)}원
-              </span>
-              {quantity > 1 && (
-                <span className="text-xs text-gray-500">
-                  ({quantity}개)
+        {/* Compact Product Info Row */}
+        <div className="px-4 py-2 border-b border-gray-100">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+              <img
+                src={product.images[selectedImage]}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-medium text-gray-900 truncate">
+                {product.name}
+              </h3>
+              <div className="flex items-center space-x-2">
+                <span className="text-base font-bold text-primary-800">
+                  {formatPrice(product.price * quantity)}원
                 </span>
-              )}
+                {quantity > 1 && (
+                  <span className="text-xs text-gray-500">
+                    ({quantity}개)
+                  </span>
+                )}
+              </div>
+            </div>
+            
+            {/* Compact Quantity Controls */}
+            <div className="flex items-center space-x-1 bg-gray-50 rounded-lg p-1">
+              <button
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                className="p-2 rounded-md hover:bg-gray-100 touch-manipulation min-h-[36px] min-w-[36px] flex items-center justify-center"
+                disabled={quantity <= 1}
+              >
+                <ApperIcon name="Minus" size={14} />
+              </button>
+              <span className="text-sm font-medium w-8 text-center">
+                {quantity}
+              </span>
+              <button
+                onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                className="p-2 rounded-md hover:bg-gray-100 touch-manipulation min-h-[36px] min-w-[36px] flex items-center justify-center"
+                disabled={quantity >= product.stock || !product.isInStock}
+              >
+                <ApperIcon name="Plus" size={14} />
+              </button>
             </div>
           </div>
+        </div>
 
-          {/* Quantity Controls */}
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="p-1.5 border border-gray-300 rounded-md hover:bg-gray-50 touch-manipulation"
-              disabled={quantity <= 1}
-            >
-              <ApperIcon name="Minus" size={14} />
-            </button>
-            <span className="text-sm font-medium w-8 text-center">
-              {quantity}
-            </span>
-            <button
-              onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-              className="p-1.5 border border-gray-300 rounded-md hover:bg-gray-50 touch-manipulation"
-              disabled={quantity >= product.stock || !product.isInStock}
-            >
-              <ApperIcon name="Plus" size={14} />
-            </button>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex space-x-2">
+        {/* Action Buttons Row */}
+        <div className="px-4 py-3">
+          <div className="flex space-x-3">
             <Button
               onClick={handleAddToCart}
               variant="outline"
-              size="small"
               disabled={!product.isInStock}
-              className="px-3 py-2 touch-manipulation"
+              className="flex-1 touch-manipulation min-h-[48px] flex items-center justify-center space-x-2"
             >
-              <ApperIcon name="ShoppingCart" size={16} />
+              <ApperIcon name="ShoppingCart" size={18} />
+              <span className="hidden xs:inline">장바구니</span>
             </Button>
             <Button
               onClick={handleBuyNow}
               variant="primary"
-              size="small"
               disabled={!product.isInStock}
-              className="px-4 py-2 touch-manipulation"
+              className="flex-2 touch-manipulation min-h-[48px] flex items-center justify-center space-x-2"
+              style={{ flex: '2' }}
             >
-              구매
+              <ApperIcon name="CreditCard" size={18} />
+              <span>바로구매</span>
             </Button>
           </div>
+          
+          {/* Stock Status */}
+          {!product.isInStock && (
+            <div className="mt-2 text-center">
+              <span className="text-sm text-red-600 font-medium">품절</span>
+            </div>
+          )}
         </div>
+        
+        {/* Safe Area Spacer */}
+        <div style={{ height: 'env(safe-area-inset-bottom)' }} />
       </motion.div>
     </div>
   );

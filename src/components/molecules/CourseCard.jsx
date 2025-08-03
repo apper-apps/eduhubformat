@@ -15,9 +15,9 @@ const CourseCard = ({ course, className, ...props }) => {
   };
 
   return (
-    <div
+<div
       className={cn(
-        "card-elevated bg-card-gradient p-0 overflow-hidden group cursor-pointer",
+        "card-elevated bg-card-gradient p-0 overflow-hidden group cursor-pointer touch-manipulation active:scale-[0.98] transition-transform duration-200",
         className
       )}
       {...props}

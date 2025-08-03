@@ -17,9 +17,10 @@ const MobileNav = ({ isOpen, onClose }) => {
   return (
     <>
       {/* Overlay */}
-      <div 
-        className="mobile-nav-overlay"
+<div 
+        className="mobile-nav-overlay touch-manipulation"
         onClick={onClose}
+        onTouchEnd={onClose}
       />
       
       {/* Mobile Menu */}
@@ -31,25 +32,25 @@ const MobileNav = ({ isOpen, onClose }) => {
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
             <h2 className="text-xl font-bold text-gradient">메뉴</h2>
-            <Button
+<Button
               variant="ghost"
               size="small"
               onClick={onClose}
-              className="p-2"
+              className="p-3 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
             >
               <ApperIcon name="X" size={20} />
             </Button>
           </div>
 
           {/* Navigation Links */}
-          <nav className="flex-1 px-6 py-8">
-            <ul className="space-y-6">
+<nav className="flex-1 px-6 py-8">
+            <ul className="space-y-4">
               {navItems.map((item) => (
                 <li key={item.path}>
                   <NavLink
                     to={item.path}
                     onClick={onClose}
-                    className="block text-lg font-semibold py-3 px-4 rounded-lg hover:bg-primary-50 transition-colors duration-200"
+                    className="block text-lg font-semibold py-4 px-4 rounded-lg hover:bg-primary-50 active:bg-primary-100 transition-all duration-200 touch-manipulation min-h-[56px] flex items-center"
                   >
                     {item.label}
                   </NavLink>
@@ -58,9 +59,12 @@ const MobileNav = ({ isOpen, onClose }) => {
             </ul>
           </nav>
 
-          {/* Footer */}
+{/* Footer */}
           <div className="p-6 border-t border-gray-200">
-            <Button variant="gradient" className="w-full">
+            <Button 
+              variant="gradient" 
+              className="w-full touch-manipulation min-h-[48px] text-lg font-semibold"
+            >
               무료 체험 시작하기
             </Button>
           </div>

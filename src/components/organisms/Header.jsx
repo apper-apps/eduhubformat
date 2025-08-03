@@ -53,9 +53,9 @@ const navItems = [
             {/* Desktop CTA */}
 <div className="hidden md:flex items-center space-x-4">
               {/* Cart Icon */}
-              <button
+<button
                 onClick={() => dispatch(toggleCart())}
-                className="relative p-2 text-gray-700 hover:text-primary-800 transition-colors"
+                className="relative p-3 text-gray-700 hover:text-primary-800 transition-colors touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 <ApperIcon name="ShoppingCart" size={20} />
                 {totalQuantity > 0 && (
@@ -65,10 +65,10 @@ const navItems = [
                 )}
               </button>
               
-              <Button variant="ghost" size="small">
+              <Button variant="ghost" size="small" className="touch-manipulation min-h-[44px]">
                 로그인
               </Button>
-              <Button variant="gradient" size="small">
+              <Button variant="gradient" size="small" className="touch-manipulation min-h-[44px]">
                 무료 체험
               </Button>
             </div>
@@ -78,11 +78,11 @@ const navItems = [
               {/* Mobile Cart Icon */}
               <button
                 onClick={() => dispatch(toggleCart())}
-                className="relative p-2 text-gray-700 hover:text-primary-800 transition-colors"
+                className="relative p-3 text-gray-700 hover:text-primary-800 active:text-primary-900 transition-colors touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 <ApperIcon name="ShoppingCart" size={20} />
                 {totalQuantity > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary-800 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-medium">
+                  <span className="absolute -top-1 -right-1 bg-primary-800 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium animate-pulse">
                     {totalQuantity > 9 ? '9+' : totalQuantity}
                   </span>
                 )}
@@ -91,7 +91,7 @@ const navItems = [
                 variant="ghost"
                 size="small"
                 onClick={toggleMobileNav}
-                className="p-2"
+                className="p-3 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
               >
                 <ApperIcon name="Menu" size={24} />
               </Button>

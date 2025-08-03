@@ -76,23 +76,3 @@ export const deleteReview = async (id) => {
   reviewsData.splice(reviewIndex, 1);
   return deletedReview;
 };
-
-export const updateReview = async (id, reviewData) => {
-  await new Promise(resolve => setTimeout(resolve, 400));
-  const reviewIndex = reviewsData.findIndex(review => review.Id === parseInt(id));
-  if (reviewIndex === -1) {
-    throw new Error("Review not found");
-  }
-  reviewsData[reviewIndex] = { ...reviewsData[reviewIndex], ...reviewData };
-  return { ...reviewsData[reviewIndex] };
-};
-
-export const deleteReview = async (id) => {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  const reviewIndex = reviewsData.findIndex(review => review.Id === parseInt(id));
-  if (reviewIndex === -1) {
-    throw new Error("Review not found");
-  }
-  const deletedReview = reviewsData.splice(reviewIndex, 1)[0];
-  return { ...deletedReview };
-};

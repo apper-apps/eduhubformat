@@ -441,15 +441,13 @@ const nextCohort = getNextCohort();
                     )}
                     disabled={!selectedCohort}
                   >
-                    {!selectedCohort 
+{!selectedCohort 
                       ? "기수를 선택하세요"
                       : selectedCohort.capacity - selectedCohort.enrolled > 0 
                         ? "수강 신청" 
                         : "대기 신청"
                     }
-}
                   </Button>
-
                   {/* Review Button for Enrolled Users */}
                   {userEnrollment && userEnrollment.status === 'enrolled' && (
                     <Button 

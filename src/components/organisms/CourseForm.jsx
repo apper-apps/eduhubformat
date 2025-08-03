@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { toast } from 'react-toastify'
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
-import { cn } from '@/utils/cn'
-import { createCourse, updateCourse, getCourseById } from '@/services/api/courseService'
-import Button from '@/components/atoms/Button'
-import ApperIcon from '@/components/ApperIcon'
-import Loading from '@/components/ui/Loading'
-import Error from '@/components/ui/Error'
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
+import { createCourse, getCourseById, updateCourse } from "@/services/api/courseService";
+import ApperIcon from "@/components/ApperIcon";
+import Loading from "@/components/ui/Loading";
+import Error from "@/components/ui/Error";
+import Button from "@/components/atoms/Button";
+import { cn } from "@/utils/cn";
 
 export default function CourseForm() {
   const { id } = useParams();
@@ -599,11 +599,12 @@ export default function CourseForm() {
                   </div>
                 </div>
               )}
+)}
 
               {/* Curriculum List */}
               {formData.curriculum.length > 0 ? (
                 <DragDropContext onDragEnd={handleDragEnd}>
-                  <Droppable droppableId="curriculum">
+                  <Droppable droppableId="curriculum-list">
                     {(provided) => (
                       <div
                         {...provided.droppableProps}
@@ -617,35 +618,47 @@ export default function CourseForm() {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 className={cn(
-                                  'flex items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg group hover:shadow-md transition-all',
-                                  snapshot.isDragging && 'shadow-lg'
+                                  "bg-white border border-gray-200 rounded-lg p-4 transition-all",
+                                  snapshot.isDragging ? "shadow-lg" : "shadow-sm"
                                 )}
                               >
-                                <div
-                                  {...provided.dragHandleProps}
-                                  className="p-1 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing"
-                                >
-                                  <ApperIcon name="GripVertical" size={16} />
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    {...provided.dragHandleProps}
+                                    className="cursor-move p-1 text-gray-400 hover:text-gray-600"
+                                  >
+                                    <ApperIcon name="GripVertical" size={16} />
+                                  </div>
+                                  
+                                  <div className="flex-1">
+                                    <div className="flex items-center justify-between">
+                                      <h4 className="font-medium text-gray-900">
+                                        {index + 1}. {item.title}
+                                      </h4>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveCurriculumItem(item.id)}
+                                        className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-all"
+                                      >
+                                        <ApperIcon name="Trash2" size={16} />
+                                      </button>
+                                    </div>
+                                    
+                                    {item.videoUrl && (
+                                      <div className="mt-2">
+                                        <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                                          <iframe
+                                            src={item.videoUrl}
+                                            className="w-full h-full"
+                                            frameBorder="0"
+                                            allowFullScreen
+                                            title={item.title}
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
-                                
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="text-sm font-medium text-gray-900 truncate">
-                                    {item.title}
-                                  </h4>
-                                  {item.videoUrl && (
-                                    <p className="text-xs text-gray-500 truncate mt-1">
-                                      {item.videoUrl}
-                                    </p>
-                                  )}
-                                </div>
-                                
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveCurriculumItem(item.id)}
-                                  className="opacity-0 group-hover:opacity-100 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-all"
-                                >
-                                  <ApperIcon name="Trash2" size={16} />
-                                </button>
                               </div>
                             )}
                           </Draggable>
@@ -662,7 +675,6 @@ export default function CourseForm() {
                   <p className="text-sm">위에서 새로운 항목을 추가해보세요.</p>
                 </div>
               )}
-            </div>
           )}
         </form>
       </div>

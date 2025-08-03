@@ -66,14 +66,11 @@ const CourseCard = ({ course, className, ...props }) => {
             </div>
           )}
 
-          {/* Price and CTA */}
+{/* Price */}
           <div className="flex items-center justify-between">
             <div className="text-2xl font-bold text-primary-800">
               {formatPrice(price)}
             </div>
-            <Button variant="ghost" size="small" className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-              수강하기
-            </Button>
           </div>
 
           {/* Course Stats */}

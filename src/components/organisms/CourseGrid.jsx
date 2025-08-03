@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { cn } from "@/utils/cn";
 import CourseCard from "@/components/molecules/CourseCard";
 import Loading from "@/components/ui/Loading";
@@ -7,7 +8,6 @@ import Empty from "@/components/ui/Empty";
 import Button from "@/components/atoms/Button";
 import ApperIcon from "@/components/ApperIcon";
 import { getCourses } from "@/services/api/courseService";
-
 const CourseGrid = ({ className, limit = null, showFilters = true }) => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -141,14 +141,15 @@ const CourseGrid = ({ className, limit = null, showFilters = true }) => {
           description="다른 카테고리를 선택하거나 필터를 초기화해보세요."
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredAndSortedCourses.map((course) => (
-            <CourseCard
-              key={course.Id}
-              course={course}
-              className="animate-scale-in"
-              style={{ animationDelay: `${filteredAndSortedCourses.indexOf(course) * 100}ms` }}
-            />
+            <Link key={course.Id} to={`/courses/${course.Id}`}>
+              <CourseCard
+                course={course}
+                className="animate-scale-in"
+                style={{ animationDelay: `${filteredAndSortedCourses.indexOf(course) * 100}ms` }}
+              />
+            </Link>
           ))}
         </div>
       )}

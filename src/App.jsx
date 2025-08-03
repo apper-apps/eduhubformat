@@ -4,17 +4,18 @@ import { ToastContainer } from "react-toastify";
 import Layout from "@/components/organisms/Layout";
 import HomePage from "@/components/pages/HomePage";
 import CoursesPage from "@/components/pages/CoursesPage";
+import CourseDetailPage from "@/components/pages/CourseDetailPage";
 import StorePage from "@/components/pages/StorePage";
 import ReviewsPage from "@/components/pages/ReviewsPage";
-
 function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-stone-50">
-        <Routes>
+<Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<HomePage />} />
             <Route path="courses" element={<CoursesPage />} />
+            <Route path="courses/:id" element={<CourseDetailPage />} />
             <Route path="store" element={<StorePage />} />
             <Route path="reviews" element={<ReviewsPage />} />
           </Route>

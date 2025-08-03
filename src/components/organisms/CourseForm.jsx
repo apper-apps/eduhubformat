@@ -120,22 +120,36 @@ const loadCourseData = async () => {
   };
 
   // Curriculum management
-  const handleAddCurriculumItem = () => {
-    if (newCurriculumItem.title.trim()) {
-      const newItem = {
-        id: Date.now().toString(),
-        title: newCurriculumItem.title.trim(),
-        videoUrl: newCurriculumItem.videoUrl.trim()
-      };
-      
-      setFormData(prev => ({
-        ...prev,
-        curriculum: [...prev.curriculum, newItem]
-      }));
-      
-      setNewCurriculumItem({ title: '', videoUrl: '' });
-      setShowNewCurriculumForm(false);
+const handleAddCurriculumItem = () => {
+    const trimmedTitle = newCurriculumItem.title.trim();
+    const trimmedVideoUrl = newCurriculumItem.videoUrl.trim();
+    
+    // Validation: Check for empty title
+    if (!trimmedTitle) {
+      toast.error('커리큘럼 제목을 입력해주세요.');
+      return;
     }
+    
+    // Validation: Check for duplicate embed_url
+    if (trimmedVideoUrl && formData.curriculum.some(item => item.videoUrl === trimmedVideoUrl)) {
+      toast.error('이미 사용된 비디오 URL입니다. 다른 URL을 입력해주세요.');
+      return;
+    }
+    
+    const newItem = {
+      id: Date.now().toString(),
+      title: trimmedTitle,
+      videoUrl: trimmedVideoUrl
+    };
+    
+    setFormData(prev => ({
+      ...prev,
+      curriculum: [...prev.curriculum, newItem]
+    }));
+    
+    setNewCurriculumItem({ title: '', videoUrl: '' });
+    setShowNewCurriculumForm(false);
+    toast.success('커리큘럼 항목이 추가되었습니다.');
   };
 
   const handleRemoveCurriculumItem = (id) => {

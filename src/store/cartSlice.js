@@ -1,18 +1,45 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { toast } from 'react-toastify';
-
-const initialState = {
-  items: [],
-  totalQuantity: 0,
-  totalAmount: 0,
-  isOpen: false
+// Load cart state from localStorage
+const loadCartFromStorage = () => {
+  try {
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      return JSON.parse(savedCart);
+    }
+  } catch (error) {
+    console.error('Failed to load cart from localStorage:', error);
+  }
+  return {
+    items: [],
+    totalQuantity: 0,
+    totalAmount: 0,
+    isOpen: false
+  };
 };
+
+// Save cart state to localStorage
+const saveCartToStorage = (state) => {
+  try {
+    const cartData = {
+      items: state.items,
+      totalQuantity: state.totalQuantity,
+      totalAmount: state.totalAmount,
+      isOpen: false // Don't persist sidebar open state
+    };
+    localStorage.setItem('cart', JSON.stringify(cartData));
+  } catch (error) {
+    console.error('Failed to save cart to localStorage:', error);
+  }
+};
+
+const initialState = loadCartFromStorage();
 
 const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
-    addToCart: (state, action) => {
+addToCart: (state, action) => {
       const { productId, name, price, quantity = 1, variants = {}, image } = action.payload;
       
       // Create unique key for variants
@@ -42,10 +69,13 @@ const cartSlice = createSlice({
       state.totalQuantity += quantity;
       state.totalAmount += price * quantity;
       
+      // Save to localStorage
+      saveCartToStorage(state);
+      
       toast.success(`${name}이(가) 장바구니에 추가되었습니다!`);
     },
 
-    removeFromCart: (state, action) => {
+removeFromCart: (state, action) => {
       const itemId = action.payload;
       const itemIndex = state.items.findIndex(item => item.id === itemId);
       
@@ -55,11 +85,14 @@ const cartSlice = createSlice({
         state.totalAmount -= item.price * item.quantity;
         state.items.splice(itemIndex, 1);
         
+        // Save to localStorage
+        saveCartToStorage(state);
+        
         toast.success(`${item.name}이(가) 장바구니에서 제거되었습니다.`);
       }
     },
 
-    updateQuantity: (state, action) => {
+updateQuantity: (state, action) => {
       const { itemId, quantity } = action.payload;
       const item = state.items.find(item => item.id === itemId);
       
@@ -68,13 +101,20 @@ const cartSlice = createSlice({
         state.totalQuantity += quantityDiff;
         state.totalAmount += item.price * quantityDiff;
         item.quantity = quantity;
+        
+        // Save to localStorage
+        saveCartToStorage(state);
       }
     },
 
-    clearCart: (state) => {
+clearCart: (state) => {
       state.items = [];
       state.totalQuantity = 0;
       state.totalAmount = 0;
+      
+      // Save to localStorage
+      saveCartToStorage(state);
+      
       toast.success('장바구니가 비워졌습니다.');
     },
 

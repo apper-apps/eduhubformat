@@ -148,3 +148,36 @@ export const getStockStatus = (product) => {
     return 'in_stock';
   }
 };
+
+export const restockProduct = async (productId, newStock) => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 200));
+  
+  const productIdInt = parseInt(productId);
+  if (isNaN(productIdInt)) {
+    throw new Error('Invalid product ID');
+  }
+  
+  const product = products.find(p => p.Id === productIdInt);
+  if (!product) {
+    throw new Error('Product not found');
+  }
+  
+  // Update stock
+  product.stock = newStock;
+  product.isInStock = newStock > 0;
+  
+  // Trigger restock notifications
+  if (newStock > 0) {
+    // Import notification service dynamically to avoid circular dependency
+    const { sendRestockNotifications } = await import('./notificationService.js');
+    const notificationResult = await sendRestockNotifications(productIdInt);
+    
+    return {
+      product: { ...product },
+      notificationsSent: notificationResult.notificationsSent
+    };
+  }
+  
+  return { product: { ...product }, notificationsSent: 0 };
+};

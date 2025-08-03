@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { toast } from 'react-toastify';
-import { motion } from 'framer-motion';
-import { cn } from '@/utils/cn';
-import { getProductById } from '@/services/api/productService';
-import { addToCart } from '@/store/cartSlice';
-import { getFrequentlyBoughtTogether } from '@/services/api/recommendationService';
-import Loading from '@/components/ui/Loading';
-import Error from '@/components/ui/Error';
-import Button from '@/components/atoms/Button';
-import Badge from '@/components/atoms/Badge';
-import ApperIcon from '@/components/ApperIcon';
-import RecommendationCarousel from '@/components/organisms/RecommendationCarousel';
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { motion } from "framer-motion";
+import { checkSubscriptionStatus, subscribeToRestockNotification, unsubscribeFromRestockNotification } from "@/services/api/notificationService";
+import { formatPrice } from "@/services/api/orderService";
+import { getProductById } from "@/services/api/productService";
+import { getFrequentlyBoughtTogether } from "@/services/api/recommendationService";
+import ApperIcon from "@/components/ApperIcon";
+import RecommendationCarousel from "@/components/organisms/RecommendationCarousel";
+import Loading from "@/components/ui/Loading";
+import Error from "@/components/ui/Error";
+import Badge from "@/components/atoms/Badge";
+import Button from "@/components/atoms/Button";
+import { addToCart } from "@/store/cartSlice";
+import { cn } from "@/utils/cn";
 
 // Product social sharing functions
 const shareProductToFacebook = (product) => {
@@ -62,12 +64,8 @@ const copyProductLink = async (product) => {
     document.body.removeChild(textArea);
     toast.success('상품 링크가 클립보드에 복사되었습니다!');
   }
+}
 };
-
-const formatPrice = (price) => {
-  return new Intl.NumberFormat('ko-KR').format(price);
-};
-const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -82,9 +80,14 @@ const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [frequentlyBought, setFrequentlyBought] = useState([]);
   const [recommendationsLoading, setRecommendationsLoading] = useState(true);
+// Notification states
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [showEmailInput, setShowEmailInput] = useState(false);
+  const [notificationLoading, setNotificationLoading] = useState(false);
 
   useEffect(() => {
-loadProduct();
+    loadProduct();
     loadRecommendations();
   }, [id]);
 
@@ -127,11 +130,48 @@ loadProduct();
       setRecommendationsLoading(false);
     }
   };
+const handleRestockNotification = async () => {
+    if (!customerEmail) {
+      setShowEmailInput(true);
+      return;
+    }
 
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('ko-KR').format(price);
+    setNotificationLoading(true);
+    try {
+      if (isSubscribed) {
+        await unsubscribeFromRestockNotification(id, customerEmail);
+        setIsSubscribed(false);
+        toast.success('재입고 알림 신청이 취소되었습니다.');
+      } else {
+        await subscribeToRestockNotification(id, customerEmail);
+        setIsSubscribed(true);
+        toast.success('재입고 알림 신청이 완료되었습니다. 상품이 재입고되면 이메일로 알려드릴게요!');
+      }
+      setShowEmailInput(false);
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setNotificationLoading(false);
+    }
   };
 
+  const checkNotificationStatus = async () => {
+    if (!customerEmail) return;
+    
+    try {
+      const { isSubscribed: subscribed } = await checkSubscriptionStatus(id, customerEmail);
+      setIsSubscribed(subscribed);
+    } catch (error) {
+      console.error('Failed to check notification status:', error);
+    }
+  };
+
+  // Check notification status when email changes
+  useEffect(() => {
+    if (customerEmail && customerEmail.includes('@')) {
+      checkNotificationStatus();
+    }
+}, [customerEmail, id]);
   const getCategoryColor = (category) => {
     switch (category) {
       case '교재':
@@ -516,30 +556,88 @@ const handleAddToCart = () => {
               </div>
             </div>
 
-            {/* Action Buttons */}
-<div className="space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Button
-                  onClick={handleAddToCart}
-                  variant="outline"
-                  size="large"
-                  disabled={!product.isInStock}
-                  className="flex items-center justify-center space-x-2 touch-manipulation min-h-[48px]"
-                >
-                  <ApperIcon name="ShoppingCart" size={20} />
-                  <span>장바구니 담기</span>
-                </Button>
-                <Button
-                  onClick={handleBuyNow}
-                  variant="primary"
-                  size="large"
-                  disabled={!product.isInStock}
-                  className="flex items-center justify-center space-x-2 touch-manipulation min-h-[48px]"
-                >
-                  <ApperIcon name="CreditCard" size={20} />
-                  <span>바로구매</span>
-                </Button>
-              </div>
+{/* Action Buttons */}
+            <div className="space-y-3">
+              {product.isInStock ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Button
+                    onClick={handleAddToCart}
+                    variant="outline"
+                    size="large"
+                    className="flex items-center justify-center space-x-2 touch-manipulation min-h-[48px]"
+                  >
+                    <ApperIcon name="ShoppingCart" size={20} />
+                    <span>장바구니 담기</span>
+                  </Button>
+                  <Button
+                    onClick={handleBuyNow}
+                    variant="primary"
+                    size="large"
+                    className="flex items-center justify-center space-x-2 touch-manipulation min-h-[48px]"
+                  >
+                    <ApperIcon name="CreditCard" size={20} />
+                    <span>바로구매</span>
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {/* Out of Stock Message */}
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                    <div className="flex items-center justify-center space-x-2 mb-2">
+                      <ApperIcon name="X" size={20} className="text-red-600" />
+                      <span className="text-red-600 font-medium">현재 품절된 상품입니다</span>
+                    </div>
+                    <p className="text-sm text-gray-600">재입고 알림을 신청하시면 상품이 재입고될 때 이메일로 알려드립니다.</p>
+                  </div>
+
+                  {/* Email Input for Notification */}
+                  {showEmailInput && (
+                    <div className="space-y-2">
+                      <input
+                        type="email"
+                        placeholder="알림받을 이메일 주소를 입력해주세요"
+                        value={customerEmail}
+                        onChange={(e) => setCustomerEmail(e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      />
+                    </div>
+                  )}
+
+                  {/* Restock Notification Button */}
+                  <Button
+                    onClick={handleRestockNotification}
+                    variant={isSubscribed ? "outline" : "primary"}
+                    size="large"
+                    disabled={notificationLoading}
+                    className="w-full flex items-center justify-center space-x-2 touch-manipulation min-h-[48px]"
+                  >
+                    {notificationLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
+                        <span>처리중...</span>
+                      </>
+                    ) : (
+                      <>
+                        <ApperIcon name={isSubscribed ? "BellOff" : "Bell"} size={20} />
+                        <span>
+                          {isSubscribed ? "재입고 알림 취소" : "재입고 알림 신청"}
+                        </span>
+                      </>
+                    )}
+                  </Button>
+
+                  {isSubscribed && customerEmail && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                      <div className="flex items-center justify-center space-x-2">
+                        <ApperIcon name="CheckCircle" size={16} className="text-green-600" />
+                        <span className="text-sm text-green-700">
+                          {customerEmail}로 재입고 알림이 설정되었습니다
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
               
               {/* Review Button for Purchased Products */}
               <Button
@@ -555,13 +653,16 @@ const handleAddToCart = () => {
                 <span>후기 작성</span>
               </Button>
               
-              <div className="text-center">
-                <span className="text-sm text-gray-500">
-                  총 주문금액: <span className="font-bold text-lg text-gray-900">
-                    {formatPrice(product.price * quantity)}원
+              {product.isInStock && (
+                <div className="text-center">
+                  <span className="text-sm text-gray-500">
+                    총 주문금액: <span className="font-bold text-lg text-gray-900">
+                      {formatPrice(product.price * quantity)}원
+                    </span>
                   </span>
-                </span>
-</div>
+                </div>
+              )}
+            </div>
               
               {/* Social Sharing */}
               <div className="mt-4 pt-4 border-t border-gray-200">
@@ -722,34 +823,67 @@ const handleAddToCart = () => {
           </div>
         </div>
 
-        {/* Action Buttons Row */}
+{/* Action Buttons Row */}
         <div className="px-4 py-3">
-          <div className="flex space-x-3">
-            <Button
-              onClick={handleAddToCart}
-              variant="outline"
-              disabled={!product.isInStock}
-              className="flex-1 touch-manipulation min-h-[48px] flex items-center justify-center space-x-2"
-            >
-              <ApperIcon name="ShoppingCart" size={18} />
-              <span className="hidden xs:inline">장바구니</span>
-            </Button>
-            <Button
-              onClick={handleBuyNow}
-              variant="primary"
-              disabled={!product.isInStock}
-              className="flex-2 touch-manipulation min-h-[48px] flex items-center justify-center space-x-2"
-              style={{ flex: '2' }}
-            >
-              <ApperIcon name="CreditCard" size={18} />
-              <span>바로구매</span>
-            </Button>
-          </div>
-          
-          {/* Stock Status */}
-          {!product.isInStock && (
-            <div className="mt-2 text-center">
-              <span className="text-sm text-red-600 font-medium">품절</span>
+          {product.isInStock ? (
+            <div className="flex space-x-3">
+              <Button
+                onClick={handleAddToCart}
+                variant="outline"
+                className="flex-1 touch-manipulation min-h-[48px] flex items-center justify-center space-x-2"
+              >
+                <ApperIcon name="ShoppingCart" size={18} />
+                <span className="hidden xs:inline">장바구니</span>
+              </Button>
+              <Button
+                onClick={handleBuyNow}
+                variant="primary"
+                className="flex-2 touch-manipulation min-h-[48px] flex items-center justify-center space-x-2"
+                style={{ flex: '2' }}
+              >
+                <ApperIcon name="CreditCard" size={18} />
+                <span>바로구매</span>
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {/* Email Input for Mobile */}
+              {showEmailInput && (
+                <input
+                  type="email"
+                  placeholder="알림받을 이메일"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              )}
+              
+              {/* Restock Notification Button */}
+              <Button
+                onClick={handleRestockNotification}
+                variant={isSubscribed ? "outline" : "primary"}
+                disabled={notificationLoading}
+                className="w-full touch-manipulation min-h-[48px] flex items-center justify-center space-x-2"
+              >
+                {notificationLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                    <span className="text-sm">처리중...</span>
+                  </>
+                ) : (
+                  <>
+                    <ApperIcon name={isSubscribed ? "BellOff" : "Bell"} size={16} />
+                    <span className="text-sm">
+                      {isSubscribed ? "알림 취소" : "재입고 알림"}
+                    </span>
+                  </>
+                )}
+              </Button>
+
+              {/* Stock Status */}
+              <div className="text-center">
+                <span className="text-sm text-red-600 font-medium">품절</span>
+              </div>
             </div>
           )}
         </div>

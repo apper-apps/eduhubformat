@@ -442,7 +442,7 @@ const handleAddToCart = () => {
           </motion.div>
         )}
 
-        {/* Back to Store */}
+{/* Back to Store */}
         <motion.div
           className="mt-8 text-center"
           initial={{ opacity: 0, y: 20 }}
@@ -457,6 +457,86 @@ const handleAddToCart = () => {
           </Link>
         </motion.div>
       </div>
+
+      {/* Mobile Sticky Checkout Bar */}
+      <motion.div
+        className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 px-4 py-3 shadow-elevated z-50 lg:hidden"
+        initial={{ opacity: 0, y: 100 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.8 }}
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        <div className="flex items-center space-x-3">
+          {/* Product Image */}
+          <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+            <img
+              src={product.images[0]}
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          {/* Product Info */}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-medium text-gray-900 truncate">
+              {product.name}
+            </h3>
+            <div className="flex items-center space-x-2">
+              <span className="text-lg font-bold text-primary-800">
+                {formatPrice(product.price * quantity)}원
+              </span>
+              {quantity > 1 && (
+                <span className="text-xs text-gray-500">
+                  ({quantity}개)
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Quantity Controls */}
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              className="p-1.5 border border-gray-300 rounded-md hover:bg-gray-50 touch-manipulation"
+              disabled={quantity <= 1}
+            >
+              <ApperIcon name="Minus" size={14} />
+            </button>
+            <span className="text-sm font-medium w-8 text-center">
+              {quantity}
+            </span>
+            <button
+              onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+              className="p-1.5 border border-gray-300 rounded-md hover:bg-gray-50 touch-manipulation"
+              disabled={quantity >= product.stock || !product.isInStock}
+            >
+              <ApperIcon name="Plus" size={14} />
+            </button>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex space-x-2">
+            <Button
+              onClick={handleAddToCart}
+              variant="outline"
+              size="small"
+              disabled={!product.isInStock}
+              className="px-3 py-2 touch-manipulation"
+            >
+              <ApperIcon name="ShoppingCart" size={16} />
+            </Button>
+            <Button
+              onClick={handleBuyNow}
+              variant="primary"
+              size="small"
+              disabled={!product.isInStock}
+              className="px-4 py-2 touch-manipulation"
+            >
+              구매
+            </Button>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 };

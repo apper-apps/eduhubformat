@@ -599,11 +599,11 @@ export default function CourseForm() {
 </div>
                 </div>
               )}
-)}
 
-              {/* Curriculum List */}
+{/* Curriculum List */}
               {formData.curriculum.length > 0 ? (
                 <DragDropContext onDragEnd={handleDragEnd}>
+                  <Droppable droppableId="curriculum" type="curriculum">
                     {(provided) => (
                       <div
                         {...provided.droppableProps}
@@ -672,12 +672,12 @@ export default function CourseForm() {
                   <ApperIcon name="List" size={48} className="mx-auto mb-3 text-gray-300" />
                   <p>아직 커리큘럼이 없습니다.</p>
                   <p className="text-sm">위에서 새로운 항목을 추가해보세요.</p>
-                </div>
+</div>
               )}
+            </div>
           )}
         </form>
       </div>
-
       {/* Fixed Bottom Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-10">
         <div className="max-w-4xl mx-auto px-6 py-4">

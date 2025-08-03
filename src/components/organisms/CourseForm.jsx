@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { cn } from '@/utils/cn';
-import { createCourse, updateCourse, getCourseById } from '@/services/api/courseService';
-import Button from '@/components/atoms/Button';
-import ApperIcon from '@/components/ApperIcon';
-import Loading from '@/components/ui/Loading';
-import Error from '@/components/ui/Error';
+import React, { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
+import { cn } from '@/utils/cn'
+import { createCourse, updateCourse, getCourseById } from '@/services/api/courseService'
+import Button from '@/components/atoms/Button'
+import ApperIcon from '@/components/ApperIcon'
+import Loading from '@/components/ui/Loading'
+import Error from '@/components/ui/Error'
 
 export default function CourseForm() {
   const { id } = useParams();

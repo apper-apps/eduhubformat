@@ -62,10 +62,11 @@ const copyProductLink = async (product) => {
     textArea.select();
     document.execCommand('copy');
     document.body.removeChild(textArea);
-    toast.success('상품 링크가 클립보드에 복사되었습니다!');
+toast.success('상품 링크가 클립보드에 복사되었습니다!');
   }
-}
 };
+
+const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -696,9 +697,9 @@ const handleAddToCart = () => {
                     <ApperIcon name="Copy" size={16} />
                     <span>링크복사</span>
                   </button>
-                </div>
+</div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Features */}
             {product.features && (

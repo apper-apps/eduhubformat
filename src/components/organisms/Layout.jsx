@@ -1,6 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import Header from "@/components/organisms/Header";
+import CartSidebar from "@/components/organisms/CartSidebar";
 
 const Layout = () => {
   return (
@@ -9,6 +10,7 @@ const Layout = () => {
       <main className="flex-1">
         <Outlet />
       </main>
+      <CartSidebar />
     </div>
   );
 };

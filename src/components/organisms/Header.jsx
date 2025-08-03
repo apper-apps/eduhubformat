@@ -1,13 +1,16 @@
 import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { cn } from "@/utils/cn";
+import { toggleCart } from "@/store/cartSlice";
 import Logo from "@/components/atoms/Logo";
 import NavLink from "@/components/molecules/NavLink";
 import Button from "@/components/atoms/Button";
 import MobileNav from "@/components/molecules/MobileNav";
 import ApperIcon from "@/components/ApperIcon";
-
 const Header = ({ className }) => {
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const dispatch = useDispatch();
+  const { totalQuantity } = useSelector(state => state.cart);
+const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   const navItems = [
     { label: "홈", path: "/" },
@@ -47,7 +50,20 @@ const Header = ({ className }) => {
             </nav>
 
             {/* Desktop CTA */}
-            <div className="hidden md:flex items-center space-x-4">
+<div className="hidden md:flex items-center space-x-4">
+              {/* Cart Icon */}
+              <button
+                onClick={() => dispatch(toggleCart())}
+                className="relative p-2 text-gray-700 hover:text-primary-800 transition-colors"
+              >
+                <ApperIcon name="ShoppingCart" size={20} />
+                {totalQuantity > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary-800 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                    {totalQuantity > 99 ? '99+' : totalQuantity}
+                  </span>
+                )}
+              </button>
+              
               <Button variant="ghost" size="small">
                 로그인
               </Button>
@@ -57,7 +73,19 @@ const Header = ({ className }) => {
             </div>
 
             {/* Mobile Menu Button */}
-            <div className="md:hidden">
+<div className="md:hidden flex items-center space-x-2">
+              {/* Mobile Cart Icon */}
+              <button
+                onClick={() => dispatch(toggleCart())}
+                className="relative p-2 text-gray-700 hover:text-primary-800 transition-colors"
+              >
+                <ApperIcon name="ShoppingCart" size={20} />
+                {totalQuantity > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary-800 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-medium">
+                    {totalQuantity > 9 ? '9+' : totalQuantity}
+                  </span>
+                )}
+              </button>
               <Button
                 variant="ghost"
                 size="small"

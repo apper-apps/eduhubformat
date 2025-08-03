@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
 import { cn } from '@/utils/cn';
 import { getProductById } from '@/services/api/productService';
+import { addToCart } from '@/store/cartSlice';
 import Loading from '@/components/ui/Loading';
 import Error from '@/components/ui/Error';
 import Button from '@/components/atoms/Button';
 import Badge from '@/components/atoms/Badge';
 import ApperIcon from '@/components/ApperIcon';
-
 const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -76,23 +78,20 @@ const ProductDetailPage = () => {
     }));
   };
 
-  const handleAddToCart = () => {
+const handleAddToCart = () => {
     if (!product.isInStock) {
       toast.error('죄송합니다. 현재 품절된 상품입니다.');
       return;
     }
 
-    const cartItem = {
+    dispatch(addToCart({
       productId: product.Id,
       name: product.name,
       price: product.price,
       quantity,
       variants: selectedVariants,
       image: product.images[0]
-    };
-
-    // Here you would typically dispatch to a cart store
-    toast.success(`${product.name}이(가) 장바구니에 추가되었습니다!`);
+    }));
   };
 
   const handleBuyNow = () => {

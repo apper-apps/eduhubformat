@@ -66,7 +66,7 @@ export default function CourseForm() {
     }
   }, [id]);
 
-  const loadCourseData = async () => {
+const loadCourseData = async () => {
     try {
       setInitialLoading(true);
       setError(null);
@@ -74,7 +74,7 @@ export default function CourseForm() {
       
       setFormData({
         title: course.title || '',
-        introduction: course.introduction || course.description || '',
+        introduction: course.intro_md || course.introduction || course.description || '',
         objectives: course.objectives || [],
         curriculum: course.curriculum || [],
         category: course.category || 'programming',
@@ -192,7 +192,7 @@ export default function CourseForm() {
     return true;
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateForm()) return;
@@ -205,7 +205,10 @@ export default function CourseForm() {
         price: formData.price ? Number(formData.price) : 0,
         duration: formData.duration ? Number(formData.duration) : 0,
         image: formData.image || '/api/placeholder/400/300',
-        description: formData.introduction // Maintain backward compatibility
+        description: formData.introduction, // Maintain backward compatibility
+        intro_md: formData.introduction, // Support new field structure
+        objectives: formData.objectives || [],
+        curriculum: formData.curriculum || []
       };
 
       if (isEditMode) {

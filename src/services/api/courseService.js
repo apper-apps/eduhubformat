@@ -182,14 +182,22 @@ export const updateCourse = async (id, courseData) => {
     throw new Error('강의를 찾을 수 없습니다.');
   }
   
+  // Upsert logic - preserve curriculum order and update changed items
+  const existingCourse = courses[index];
+  const updatedCurriculum = courseData.curriculum || existingCourse.curriculum || [];
+  const updatedObjectives = courseData.objectives || existingCourse.objectives || [];
+  
   courses[index] = {
-    ...courses[index],
+    ...existingCourse,
     ...courseData,
     Id: id, // Ensure ID cannot be changed
-    // Ensure new fields are properly saved
-    curriculum: courseData.curriculum || courses[index].curriculum || [],
-    objectives: courseData.objectives || courses[index].objectives || [],
-    introduction: courseData.introduction || courseData.description || courses[index].introduction || courses[index].description || ''
+    // Preserve arrays with proper structure
+    curriculum: updatedCurriculum,
+    objectives: updatedObjectives,
+    // Support both intro_md and introduction fields
+    intro_md: courseData.intro_md || courseData.introduction || existingCourse.intro_md || existingCourse.introduction || existingCourse.description || '',
+    introduction: courseData.introduction || courseData.intro_md || existingCourse.introduction || existingCourse.intro_md || existingCourse.description || '',
+    description: courseData.description || courseData.introduction || courseData.intro_md || existingCourse.description || existingCourse.introduction || ''
   };
   
   return { ...courses[index] };

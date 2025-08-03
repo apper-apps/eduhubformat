@@ -12,11 +12,12 @@ const Header = ({ className }) => {
   const { totalQuantity } = useSelector(state => state.cart);
 const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
-  const navItems = [
+const navItems = [
     { label: "홈", path: "/" },
     { label: "강의", path: "/courses" },
     { label: "스토어", path: "/store" },
     { label: "이용후기", path: "/reviews" },
+    { label: "대시보드", path: "/dashboard" },
   ];
 
   const toggleMobileNav = () => {

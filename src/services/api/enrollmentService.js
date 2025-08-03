@@ -2,17 +2,92 @@ import { updateCohortEnrollment } from '@/services/api/courseService';
 
 // Mock enrollment data
 let enrollments = [
-  { Id: 1, courseId: 1, cohortId: 101, userId: 1, status: 'enrolled', enrolledAt: '2024-03-01T10:00:00Z' },
-  { Id: 2, courseId: 2, cohortId: 201, userId: 1, status: 'waitlist', enrolledAt: '2024-03-02T11:00:00Z' }
+  { 
+    Id: 1, 
+    courseId: 1, 
+    cohortId: 101, 
+    userId: 1, 
+    status: 'enrolled', 
+    enrolledAt: '2024-03-01T10:00:00Z',
+    progress: 75,
+    lastAccessedAt: '2024-12-28T14:30:00Z',
+    completedLessons: 12,
+    totalLessons: 16,
+    nextLessonTitle: 'React Hooks 심화',
+    materials: [
+      { name: '강의자료.pdf', type: 'pdf', url: '#' },
+      { name: '실습코드.zip', type: 'zip', url: '#' },
+      { name: '녹화영상', type: 'video', url: '#' }
+    ]
+  },
+  { 
+    Id: 2, 
+    courseId: 2, 
+    cohortId: 201, 
+    userId: 1, 
+    status: 'enrolled', 
+    enrolledAt: '2024-03-02T11:00:00Z',
+    progress: 45,
+    lastAccessedAt: '2024-12-27T09:15:00Z',
+    completedLessons: 9,
+    totalLessons: 20,
+    nextLessonTitle: 'UI 컴포넌트 설계',
+    materials: [
+      { name: '디자인가이드.pdf', type: 'pdf', url: '#' },
+      { name: '피그마템플릿.fig', type: 'figma', url: '#' }
+    ]
+  },
+  {
+    Id: 3,
+    courseId: 5,
+    cohortId: 501,
+    userId: 1,
+    status: 'completed',
+    enrolledAt: '2024-02-15T16:20:00Z',
+    completedAt: '2024-04-10T18:45:00Z',
+    progress: 100,
+    lastAccessedAt: '2024-04-10T18:45:00Z',
+    completedLessons: 18,
+    totalLessons: 18,
+    materials: [
+      { name: '수료증.pdf', type: 'certificate', url: '#' },
+      { name: '전체강의자료.zip', type: 'zip', url: '#' }
+    ]
+  }
 ];
 
-let nextEnrollmentId = 3;
+let nextEnrollmentId = 4;
 
 export const getAllEnrollments = async () => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 200));
   
   return [...enrollments];
+};
+
+export const getEnrollmentsByUserId = async (userId) => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 200));
+  
+  return enrollments.filter(enrollment => enrollment.userId === userId);
+};
+
+export const updateProgress = async (enrollmentId, progress) => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 200));
+  
+  const enrollment = enrollments.find(e => e.Id === enrollmentId);
+  if (enrollment) {
+    enrollment.progress = progress;
+    enrollment.lastAccessedAt = new Date().toISOString();
+    
+    if (progress >= 100) {
+      enrollment.status = 'completed';
+      enrollment.completedAt = new Date().toISOString();
+    }
+  }
+  
+  return enrollment ? { ...enrollment } : null;
 };
 
 export const getEnrollmentById = async (id) => {

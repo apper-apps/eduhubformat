@@ -22,6 +22,16 @@ export const getProductById = (id) => {
   return Promise.resolve({ ...product });
 };
 
+export const getPurchasedProducts = async (userId) => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 200));
+  
+  // Mock purchased products for user
+  const purchasedProductIds = [1, 3, 5]; // Example purchased product IDs
+  
+  return products.filter(product => purchasedProductIds.includes(product.Id));
+};
+
 export const createProduct = (productData) => {
   const newProduct = {
     ...productData,

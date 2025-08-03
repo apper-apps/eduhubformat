@@ -11,12 +11,13 @@ import ReviewsPage from "@/components/pages/ReviewsPage";
 import ProductDetailPage from "@/components/pages/ProductDetailPage";
 import StorePage from "@/components/pages/StorePage";
 import CourseDetailPage from "@/components/pages/CourseDetailPage";
+import MemberDashboard from "@/components/pages/MemberDashboard";
 function App() {
   return (
 <Provider store={store}>
       <BrowserRouter>
         <div className="min-h-screen bg-stone-50">
-          <Routes>
+<Routes>
             <Route path="/" element={<Layout />}>
               <Route index element={<HomePage />} />
               <Route path="courses" element={<CoursesPage />} />
@@ -24,6 +25,7 @@ function App() {
               <Route path="store" element={<StorePage />} />
               <Route path="store/:id" element={<ProductDetailPage />} />
               <Route path="reviews" element={<ReviewsPage />} />
+              <Route path="dashboard" element={<MemberDashboard />} />
             </Route>
           </Routes>
         

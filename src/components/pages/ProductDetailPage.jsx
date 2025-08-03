@@ -663,43 +663,42 @@ const handleAddToCart = () => {
                   </span>
                 </div>
               )}
-            </div>
-              
-              {/* Social Sharing */}
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <h4 className="text-sm font-medium text-gray-700 mb-3">이 상품 공유하기</h4>
-                <div className="flex items-center justify-center space-x-4">
-                  <button
-                    onClick={() => shareProductToFacebook(product)}
-                    className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm"
-                  >
-                    <ApperIcon name="Facebook" size={16} />
-                    <span>페이스북</span>
-                  </button>
-                  <button
-                    onClick={() => shareProductToTwitter(product)}
-                    className="flex items-center space-x-2 px-3 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors duration-200 text-sm"
-                  >
-                    <ApperIcon name="Twitter" size={16} />
-                    <span>트위터</span>
-                  </button>
-                  <button
-                    onClick={() => shareProductToKakao(product)}
-                    className="flex items-center space-x-2 px-3 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition-colors duration-200 text-sm"
-                  >
-                    <ApperIcon name="MessageCircle" size={16} />
-                    <span>카카오톡</span>
-                  </button>
-                  <button
-                    onClick={() => copyProductLink(product)}
-                    className="flex items-center space-x-2 px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 text-sm"
-                  >
-                    <ApperIcon name="Copy" size={16} />
-                    <span>링크복사</span>
-                  </button>
 </div>
+              
+            {/* Social Sharing */}
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <h4 className="text-sm font-medium text-gray-700 mb-3">이 상품 공유하기</h4>
+              <div className="flex items-center justify-center space-x-4">
+                <button
+                  onClick={() => shareProductToFacebook(product)}
+                  className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm"
+                >
+                  <ApperIcon name="Facebook" size={16} />
+                  <span>페이스북</span>
+                </button>
+                <button
+                  onClick={() => shareProductToTwitter(product)}
+                  className="flex items-center space-x-2 px-3 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors duration-200 text-sm"
+                >
+                  <ApperIcon name="Twitter" size={16} />
+                  <span>트위터</span>
+                </button>
+                <button
+                  onClick={() => shareProductToKakao(product)}
+                  className="flex items-center space-x-2 px-3 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition-colors duration-200 text-sm"
+                >
+                  <ApperIcon name="MessageCircle" size={16} />
+                  <span>카카오톡</span>
+                </button>
+                <button
+                  onClick={() => copyProductLink(product)}
+                  className="flex items-center space-x-2 px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 text-sm"
+                >
+                  <ApperIcon name="Copy" size={16} />
+                  <span>링크복사</span>
+                </button>
               </div>
-            </motion.div>
+            </div>
 
             {/* Features */}
             {product.features && (
@@ -719,7 +718,6 @@ const handleAddToCart = () => {
             )}
           </motion.div>
         </div>
-
         {/* Specifications */}
         {product.specifications && (
           <motion.div

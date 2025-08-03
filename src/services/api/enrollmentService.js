@@ -77,7 +77,7 @@ export const enrollInCourse = async (courseId, cohortId, userId = 1) => {
 
     const cohort = cohorts[0];
     
-    // Determine enrollment status based on capacity
+// Determine enrollment status based on capacity
     const currentEnrolled = cohort.enrolled || 0;
     const status = currentEnrolled < cohort.capacity ? 'enrolled' : 'waitlist';
     
@@ -89,10 +89,12 @@ export const enrollInCourse = async (courseId, cohortId, userId = 1) => {
       created_at: new Date().toISOString()
     });
     
-    // Update cohort enrollment count
-    await window.Apper.collection('Cohorts').update(cohortId, {
-      enrolled: currentEnrolled + 1
-    });
+    // Update cohort enrollment count only if successfully enrolled (not waitlisted)
+    if (status === 'enrolled') {
+      await window.Apper.collection('Cohorts').update(cohortId, {
+        enrolled: currentEnrolled + 1
+      });
+    }
     
     return {
       Id: newEnrollment.id,

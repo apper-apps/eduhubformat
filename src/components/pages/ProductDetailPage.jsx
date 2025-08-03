@@ -14,6 +14,59 @@ import Badge from '@/components/atoms/Badge';
 import ApperIcon from '@/components/ApperIcon';
 import RecommendationCarousel from '@/components/organisms/RecommendationCarousel';
 
+// Product social sharing functions
+const shareProductToFacebook = (product) => {
+  const url = encodeURIComponent(window.location.href);
+  const text = encodeURIComponent(`${product.name} - ${product.description}`);
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, '_blank', 'width=600,height=400');
+};
+
+const shareProductToTwitter = (product) => {
+  const url = encodeURIComponent(window.location.href);
+  const text = encodeURIComponent(`${product.name} 추천! ${formatPrice(product.price)}원`);
+  window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank', 'width=600,height=400');
+};
+
+const shareProductToKakao = (product) => {
+  if (window.Kakao) {
+    window.Kakao.Share.sendDefault({
+      objectType: 'commerce',
+      content: {
+        title: product.name,
+        imageUrl: product.images?.[0] || '/placeholder-product.jpg',
+        link: {
+          webUrl: window.location.href,
+          mobileWebUrl: window.location.href,
+        },
+      },
+      commerce: {
+        regularPrice: product.price,
+        currencyUnit: '원',
+      },
+    });
+  } else {
+    copyProductLink(product);
+  }
+};
+
+const copyProductLink = async (product) => {
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+    toast.success('상품 링크가 클립보드에 복사되었습니다!');
+  } catch (err) {
+    const textArea = document.createElement('textarea');
+    textArea.value = window.location.href;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    toast.success('상품 링크가 클립보드에 복사되었습니다!');
+  }
+};
+
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('ko-KR').format(price);
+};
 const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -508,6 +561,41 @@ const handleAddToCart = () => {
                     {formatPrice(product.price * quantity)}원
                   </span>
                 </span>
+</div>
+              
+              {/* Social Sharing */}
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">이 상품 공유하기</h4>
+                <div className="flex items-center justify-center space-x-4">
+                  <button
+                    onClick={() => shareProductToFacebook(product)}
+                    className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm"
+                  >
+                    <ApperIcon name="Facebook" size={16} />
+                    <span>페이스북</span>
+                  </button>
+                  <button
+                    onClick={() => shareProductToTwitter(product)}
+                    className="flex items-center space-x-2 px-3 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors duration-200 text-sm"
+                  >
+                    <ApperIcon name="Twitter" size={16} />
+                    <span>트위터</span>
+                  </button>
+                  <button
+                    onClick={() => shareProductToKakao(product)}
+                    className="flex items-center space-x-2 px-3 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition-colors duration-200 text-sm"
+                  >
+                    <ApperIcon name="MessageCircle" size={16} />
+                    <span>카카오톡</span>
+                  </button>
+                  <button
+                    onClick={() => copyProductLink(product)}
+                    className="flex items-center space-x-2 px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 text-sm"
+                  >
+                    <ApperIcon name="Copy" size={16} />
+                    <span>링크복사</span>
+                  </button>
+                </div>
               </div>
             </div>
 

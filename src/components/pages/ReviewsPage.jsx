@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
+import { getReviews, getUserVote, voteOnReview } from "@/services/api/reviewService";
+import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
-import Button from "@/components/atoms/Button";
 import Badge from "@/components/atoms/Badge";
-import ApperIcon from "@/components/ApperIcon";
-import { getReviews, voteOnReview, getUserVote } from "@/services/api/reviewService";
+import Button from "@/components/atoms/Button";
+import { cn } from "@/utils/cn";
 const ReviewsPage = () => {
 const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -185,16 +186,32 @@ const handleVote = async (reviewId, voteType) => {
             >
               {filteredReviews.map((review, index) => (
                 <motion.div
-                  key={review.Id}
-                  className="card-elevated p-8 space-y-6"
+key={review.Id}
+                  className={cn(
+                    "card-elevated p-8 space-y-6 relative",
+                    review.isFeatured && "ring-2 ring-yellow-400 bg-gradient-to-br from-yellow-50 to-amber-50"
+                  )}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
                 >
+                  {/* Featured Badge */}
+                  {review.isFeatured && (
+                    <div className="absolute -top-3 -right-3">
+                      <Badge variant="warning" className="shadow-lg">
+                        <ApperIcon name="Star" size={14} className="mr-1 fill-current" />
+                        추천 후기
+                      </Badge>
+                    </div>
+                  )}
+
                   {/* Review Header */}
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-hero-gradient rounded-full flex items-center justify-center">
+                      <div className={cn(
+                        "w-12 h-12 rounded-full flex items-center justify-center",
+                        review.isFeatured ? "bg-gradient-to-br from-yellow-400 to-amber-500" : "bg-hero-gradient"
+                      )}>
                         <span className="text-white font-bold text-lg">
                           {review.studentName.charAt(0)}
                         </span>
@@ -204,9 +221,17 @@ const handleVote = async (reviewId, voteType) => {
                         <p className="text-sm text-gray-600">{formatDate(review.createdAt)}</p>
                       </div>
                     </div>
-                    <Badge variant="primary" size="small">
-                      {review.courseCategory}
-                    </Badge>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="primary" size="small">
+                        {review.courseCategory}
+                      </Badge>
+                      {review.instructorResponse && (
+                        <Badge variant="success" size="small">
+                          <ApperIcon name="MessageCircle" size={12} className="mr-1" />
+                          답변완료
+                        </Badge>
+                      )}
+                    </div>
                   </div>
 
                   {/* Course Info */}
@@ -228,7 +253,30 @@ const handleVote = async (reviewId, voteType) => {
                       "{review.content}"
                     </blockquote>
                     
-{/* Helpful Voting */}
+{/* Instructor Response */}
+                    {review.instructorResponse && (
+                      <div className="mt-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                        <div className="flex items-start space-x-3">
+                          <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <ApperIcon name="GraduationCap" size={16} className="text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <h5 className="font-semibold text-blue-900">{review.instructorName} 강사</h5>
+                              <Badge variant="primary" size="small">강사</Badge>
+                            </div>
+                            <p className="text-blue-800 korean-text leading-relaxed">
+                              {review.instructorResponse}
+                            </p>
+                            <p className="text-xs text-blue-600 mt-2">
+                              {formatDate(review.instructorResponseDate)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Helpful Voting */}
                     <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                       <div className="flex items-center space-x-4">
                         {/* Voting Buttons */}

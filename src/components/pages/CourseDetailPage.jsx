@@ -12,6 +12,62 @@ import Badge from "@/components/atoms/Badge";
 import Button from "@/components/atoms/Button";
 import RecommendationCarousel from "@/components/organisms/RecommendationCarousel";
 import { cn } from "@/utils/cn";
+
+// Social sharing functions
+const shareToFacebook = (course) => {
+  const url = encodeURIComponent(window.location.href);
+  const text = encodeURIComponent(`${course.title} - ${course.description}`);
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, '_blank', 'width=600,height=400');
+};
+
+const shareToTwitter = (course) => {
+  const url = encodeURIComponent(window.location.href);
+  const text = encodeURIComponent(`${course.title} 강의를 확인해보세요! ${course.instructor} 강사의 실무 중심 교육`);
+  window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank', 'width=600,height=400');
+};
+
+const shareToLinkedIn = (course) => {
+  const url = encodeURIComponent(window.location.href);
+  const title = encodeURIComponent(course.title);
+  const summary = encodeURIComponent(course.description);
+  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}&title=${title}&summary=${summary}`, '_blank', 'width=600,height=400');
+};
+
+const shareToKakao = (course) => {
+  if (window.Kakao) {
+    window.Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: course.title,
+        description: course.description,
+        imageUrl: course.coverImage,
+        link: {
+          webUrl: window.location.href,
+          mobileWebUrl: window.location.href,
+        },
+      },
+    });
+  } else {
+    // Fallback to copy link
+    copyToClipboard(course);
+  }
+};
+
+const copyToClipboard = async (course) => {
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+    toast.success('링크가 클립보드에 복사되었습니다!');
+  } catch (err) {
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = window.location.href;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    toast.success('링크가 클립보드에 복사되었습니다!');
+  }
+};
 const CourseDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -273,6 +329,48 @@ const nextCohort = getNextCohort();
                     <div className="flex items-center space-x-2">
                       <ApperIcon name="Star" size={16} className="text-yellow-400 fill-current" />
                       <span>{course.rating}</span>
+                    </div>
+</div>
+
+                  {/* Social Sharing */}
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <h4 className="text-sm font-medium text-gray-700">이 강의 공유하기</h4>
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => shareToFacebook(course)}
+                        className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors duration-200"
+                        title="페이스북에 공유"
+                      >
+                        <ApperIcon name="Facebook" size={16} />
+                      </button>
+                      <button
+                        onClick={() => shareToTwitter(course)}
+                        className="flex items-center justify-center w-8 h-8 bg-sky-500 text-white rounded-full hover:bg-sky-600 transition-colors duration-200"
+                        title="트위터에 공유"
+                      >
+                        <ApperIcon name="Twitter" size={16} />
+                      </button>
+                      <button
+                        onClick={() => shareToLinkedIn(course)}
+                        className="flex items-center justify-center w-8 h-8 bg-blue-700 text-white rounded-full hover:bg-blue-800 transition-colors duration-200"
+                        title="링크드인에 공유"
+                      >
+                        <ApperIcon name="Linkedin" size={16} />
+                      </button>
+                      <button
+                        onClick={() => shareToKakao(course)}
+                        className="flex items-center justify-center w-8 h-8 bg-yellow-400 text-gray-900 rounded-full hover:bg-yellow-500 transition-colors duration-200"
+                        title="카카오톡에 공유"
+                      >
+                        <ApperIcon name="MessageCircle" size={16} />
+                      </button>
+                      <button
+                        onClick={() => copyToClipboard(course)}
+                        className="flex items-center justify-center w-8 h-8 bg-gray-500 text-white rounded-full hover:bg-gray-600 transition-colors duration-200"
+                        title="링크 복사"
+                      >
+                        <ApperIcon name="Copy" size={16} />
+                      </button>
                     </div>
                   </div>
                 </div>

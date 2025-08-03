@@ -52,9 +52,8 @@ const navItems = [
                   {item.label}
                 </NavLink>
               ))}
-              <NavDropdown label="강의">
+<NavDropdown label="강의">
                 <NavItem to="/courses">강의 목록</NavItem>
-                <NavItem to="/courses/manage" visible={user.role === 'admin'}>강의 관리</NavItem>
                 <NavItem to="/my-courses" visible={isLoggedIn}>내 강의</NavItem>
               </NavDropdown>
             </nav>

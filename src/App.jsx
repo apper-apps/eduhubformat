@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, BrowserRouter, Routes } from "react-router-dom";
+import { Route, BrowserRouter, Routes, Navigate } from "react-router-dom";
 import { Provider } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import ReviewForm from "@/components/organisms/ReviewForm";
@@ -20,14 +20,14 @@ function App() {
       <BrowserRouter>
         <div className="min-h-screen bg-stone-50">
 <Routes>
-            <Route path="/" element={<Layout />}>
+<Route path="/" element={<Layout />}>
               <Route index element={<HomePage />} />
               <Route path="courses" element={<CoursesPage />} />
               <Route path="courses/:id" element={<CourseDetailPage />} />
-<Route path="courses/manage" element={<CourseManage />} />
+              <Route path="courses/manage" element={<Navigate to="/courses" replace />} />
               <Route path="courses/new" element={<CourseNew />} />
               <Route path="courses/:id/edit" element={<CourseNew />} />
-<Route path="/my-courses" element={<MyCourses />} />
+              <Route path="/my-courses" element={<MyCourses />} />
               <Route path="/reviews" element={<ReviewsPage />} />
               <Route path="/review/create" element={<ReviewForm />} />
               <Route path="/member-dashboard" element={<MemberDashboard />} />

@@ -1,11 +1,31 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import HeroSection from "@/components/organisms/HeroSection";
-import CourseGrid from "@/components/organisms/CourseGrid";
-import Button from "@/components/atoms/Button";
+import { getRecommendedCourses } from "@/services/api/recommendationService";
+import RecommendationCarousel from "@/components/organisms/RecommendationCarousel";
 import ApperIcon from "@/components/ApperIcon";
-
+import CourseGrid from "@/components/organisms/CourseGrid";
+import HeroSection from "@/components/organisms/HeroSection";
+import Button from "@/components/atoms/Button";
 const HomePage = () => {
+  const [recommendedCourses, setRecommendedCourses] = useState([]);
+  const [recommendationsLoading, setRecommendationsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadRecommendations = async () => {
+      try {
+        setRecommendationsLoading(true);
+        const coursesData = await getRecommendedCourses();
+        setRecommendedCourses(coursesData);
+      } catch (err) {
+        console.error('Failed to load recommended courses:', err);
+      } finally {
+        setRecommendationsLoading(false);
+      }
+    };
+
+    loadRecommendations();
+  }, []);
+
   const features = [
     {
       icon: "BookOpen",
@@ -77,7 +97,7 @@ const HomePage = () => {
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3 korean-text">
                   {feature.title}
-                </h3>
+</h3>
                 <p className="text-gray-600 korean-text leading-relaxed">
                   {feature.description}
                 </p>
@@ -86,6 +106,16 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Recommended Courses Section */}
+      <RecommendationCarousel
+        title="추천 강의"
+        items={recommendedCourses}
+        isLoading={recommendationsLoading}
+        itemType="course"
+        className="bg-white"
+        itemsPerView={{ mobile: 1, tablet: 2, desktop: 3 }}
+      />
 
       {/* Stats Section */}
       <section className="py-20 bg-stone-50">

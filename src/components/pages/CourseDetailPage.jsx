@@ -3,14 +3,15 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { formatPrice } from "@/services/api/orderService";
 import { enrollInCourse } from "@/services/api/enrollmentService";
-import { getCohorts, getCourseById } from "@/services/api/courseService";
+import { getCourseById, getCohorts } from "@/services/api/courseService";
+import { getRelatedProducts, getRelatedCourses } from "@/services/api/recommendationService";
 import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import Error from "@/components/ui/Error";
 import Badge from "@/components/atoms/Badge";
 import Button from "@/components/atoms/Button";
+import RecommendationCarousel from "@/components/organisms/RecommendationCarousel";
 import { cn } from "@/utils/cn";
-
 const CourseDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -20,11 +21,13 @@ const [course, setCourse] = useState(null);
   const [cohorts, setCohorts] = useState([]);
   const [showCohortModal, setShowCohortModal] = useState(false);
   const [showEnrollmentModal, setShowEnrollmentModal] = useState(false);
-  const [selectedCohort, setSelectedCohort] = useState(null);
+const [selectedCohort, setSelectedCohort] = useState(null);
   const [isEnrolling, setIsEnrolling] = useState(false);
   const [userEnrollment, setUserEnrollment] = useState(null);
   const [enrollmentLoading, setEnrollmentLoading] = useState(true);
-
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [relatedCourses, setRelatedCourses] = useState([]);
+  const [recommendationsLoading, setRecommendationsLoading] = useState(true);
 useEffect(() => {
     const loadCourse = async () => {
       try {
@@ -46,7 +49,24 @@ useEffect(() => {
       }
     };
 
+    const loadRecommendations = async () => {
+      try {
+        setRecommendationsLoading(true);
+        const [productsData, coursesData] = await Promise.all([
+          getRelatedProducts(id),
+          getRelatedCourses(id)
+        ]);
+        setRelatedProducts(productsData);
+        setRelatedCourses(coursesData);
+      } catch (err) {
+        console.error('Failed to load recommendations:', err);
+      } finally {
+        setRecommendationsLoading(false);
+      }
+    };
+
     loadCourse();
+    loadRecommendations();
   }, [id]);
 
   const loadUserEnrollment = async (courseId) => {
@@ -337,7 +357,7 @@ const nextCohort = getNextCohort();
                             </div>
                           </div>
                         </div>
-                      </div>
+</div>
                       <ApperIcon name="ChevronDown" size={20} className="text-gray-400" />
                     </div>
                   </div>
@@ -346,6 +366,15 @@ const nextCohort = getNextCohort();
             </div>
           </div>
 
+          {/* Related Products Section */}
+          <RecommendationCarousel
+            title="관련 상품"
+            items={relatedProducts}
+            isLoading={recommendationsLoading}
+            itemType="product"
+            className="bg-gray-50"
+            itemsPerView={{ mobile: 1, tablet: 2, desktop: 3 }}
+          />
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-8 space-y-6">
@@ -497,7 +526,7 @@ const nextCohort = getNextCohort();
               {/* Countdown */}
 {nextCohort && daysLeft > 0 && (
                 <div className="bg-gradient-to-r from-primary-800 to-accent-500 rounded-xl shadow-card p-6 text-white">
-                  <div className="text-center">
+<div className="text-center">
                     <h3 className="font-bold mb-2">{nextCohort.name} 시작까지</h3>
                     <div className="text-3xl font-bold mb-2">D-{daysLeft}</div>
                     <p className="text-sm opacity-90">지금 신청하고 얼리버드 혜택을 받으세요!</p>
@@ -509,6 +538,15 @@ const nextCohort = getNextCohort();
         </div>
       </div>
 
+      {/* Related Courses Section */}
+      <RecommendationCarousel
+        title="함께 보면 좋은 강의"
+        items={relatedCourses}
+        isLoading={recommendationsLoading}
+        itemType="course"
+        className="bg-white"
+        itemsPerView={{ mobile: 1, tablet: 2, desktop: 3 }}
+      />
       {/* Cohort Selection Modal */}
       {showCohortModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

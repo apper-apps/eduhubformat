@@ -6,11 +6,14 @@ import { motion } from 'framer-motion';
 import { cn } from '@/utils/cn';
 import { getProductById } from '@/services/api/productService';
 import { addToCart } from '@/store/cartSlice';
+import { getFrequentlyBoughtTogether } from '@/services/api/recommendationService';
 import Loading from '@/components/ui/Loading';
 import Error from '@/components/ui/Error';
 import Button from '@/components/atoms/Button';
 import Badge from '@/components/atoms/Badge';
 import ApperIcon from '@/components/ApperIcon';
+import RecommendationCarousel from '@/components/organisms/RecommendationCarousel';
+
 const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -18,12 +21,15 @@ const ProductDetailPage = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(0);
+const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariants, setSelectedVariants] = useState({});
   const [quantity, setQuantity] = useState(1);
+  const [frequentlyBought, setFrequentlyBought] = useState([]);
+  const [recommendationsLoading, setRecommendationsLoading] = useState(true);
 
   useEffect(() => {
-    loadProduct();
+loadProduct();
+    loadRecommendations();
   }, [id]);
 
   const loadProduct = async () => {
@@ -51,6 +57,18 @@ const ProductDetailPage = () => {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadRecommendations = async () => {
+    try {
+      setRecommendationsLoading(true);
+      const frequentlyBoughtData = await getFrequentlyBoughtTogether(id);
+      setFrequentlyBought(frequentlyBoughtData);
+    } catch (err) {
+      console.error('Failed to load recommendations:', err);
+    } finally {
+      setRecommendationsLoading(false);
     }
   };
 
@@ -447,7 +465,7 @@ const handleAddToCart = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">상세 정보</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {Object.entries(product.specifications).map(([key, value]) => (
-                <div key={key} className="flex justify-between py-2 border-b border-gray-100">
+<div key={key} className="flex justify-between py-2 border-b border-gray-100">
                   <span className="font-medium text-gray-700">{key}</span>
                   <span className="text-gray-900">{value}</span>
                 </div>
@@ -455,6 +473,16 @@ const handleAddToCart = () => {
             </div>
           </motion.div>
         )}
+
+        {/* Frequently Bought Together Section */}
+        <RecommendationCarousel
+          title="이 강의와 함께 구매한 상품"
+          items={frequentlyBought}
+          isLoading={recommendationsLoading}
+          itemType="product"
+          className="bg-gray-50"
+          itemsPerView={{ mobile: 1, tablet: 2, desktop: 4 }}
+        />
 
 {/* Back to Store */}
         <motion.div

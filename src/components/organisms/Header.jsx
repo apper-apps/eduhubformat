@@ -9,16 +9,28 @@ import MobileNav from "@/components/molecules/MobileNav";
 import ApperIcon from "@/components/ApperIcon";
 const Header = ({ className }) => {
   const dispatch = useDispatch();
-  const { totalQuantity } = useSelector(state => state.cart);
-const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-
-const navItems = [
+const { totalQuantity } = useSelector(state => state.cart);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  
+  // Mock user context - in real app this would come from auth context
+  const user = { role: 'admin' }; // For demo purposes, set as admin
+  
+  const baseNavItems = [
     { label: "홈", path: "/" },
     { label: "강의", path: "/courses" },
     { label: "스토어", path: "/store" },
     { label: "이용후기", path: "/reviews" },
     { label: "대시보드", path: "/dashboard" },
   ];
+  
+  // Add admin-only navigation items
+  const navItems = user.role === 'admin' 
+    ? [
+        ...baseNavItems.slice(0, 2), // 홈, 강의
+        { label: "강의관리", path: "/courses/manage" }, // Add after 강의
+        ...baseNavItems.slice(2) // Rest of items
+      ]
+    : baseNavItems;
 
   const toggleMobileNav = () => {
     setIsMobileNavOpen(!isMobileNavOpen);

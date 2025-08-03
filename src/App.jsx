@@ -12,6 +12,8 @@ import ReviewsPage from "@/components/pages/ReviewsPage";
 import ProductDetailPage from "@/components/pages/ProductDetailPage";
 import StorePage from "@/components/pages/StorePage";
 import CourseDetailPage from "@/components/pages/CourseDetailPage";
+import CourseManage from "@/components/pages/CourseManage";
+import CourseNew from "@/components/pages/CourseNew";
 import store from "@/store/store";
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
               <Route index element={<HomePage />} />
               <Route path="courses" element={<CoursesPage />} />
               <Route path="courses/:id" element={<CourseDetailPage />} />
+              <Route path="courses/manage" element={<CourseManage />} />
+              <Route path="courses/new" element={<CourseNew />} />
               <Route path="/store" element={<StorePage />} />
               <Route path="/product/:id" element={<ProductDetailPage />} />
               <Route path="/reviews" element={<ReviewsPage />} />

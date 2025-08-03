@@ -596,7 +596,7 @@ export default function CourseForm() {
                         취소
                       </Button>
                     </div>
-                  </div>
+</div>
                 </div>
               )}
 )}
@@ -604,7 +604,6 @@ export default function CourseForm() {
               {/* Curriculum List */}
               {formData.curriculum.length > 0 ? (
                 <DragDropContext onDragEnd={handleDragEnd}>
-                  <Droppable droppableId="curriculum-list">
                     {(provided) => (
                       <div
                         {...provided.droppableProps}

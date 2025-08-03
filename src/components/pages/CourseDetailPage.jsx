@@ -117,10 +117,42 @@ const coursesData = await getRelatedCourses(id);
         setRecommendationsLoading(false);
       }
     };
-
-    loadCourse();
+loadCourse();
     loadRecommendations();
   }, [id]);
+
+  // Add accordion functionality
+  useEffect(() => {
+    const handleAccordionClick = () => {
+      document.querySelectorAll('.accordion-header').forEach(h => {
+        h.addEventListener('click', e => {
+          const panel = h.parentElement;
+          document.querySelectorAll('.accordion-item.is-open')
+            .forEach(p => p !== panel && p.classList.remove('is-open'));
+          panel.classList.toggle('is-open');
+          
+          // Update chevron icon
+          const chevron = h.querySelector('svg');
+          if (panel.classList.contains('is-open')) {
+            chevron.style.transform = 'rotate(90deg)';
+          } else {
+            chevron.style.transform = 'rotate(0deg)';
+          }
+        });
+      });
+    };
+
+    // Set up accordion functionality after component mounts
+    const timer = setTimeout(handleAccordionClick, 100);
+    
+    return () => {
+      clearTimeout(timer);
+      // Clean up event listeners
+      document.querySelectorAll('.accordion-header').forEach(h => {
+        h.removeEventListener('click', handleAccordionClick);
+      });
+    };
+  }, [course]);
 
   const loadUserEnrollment = async (courseId) => {
     try {

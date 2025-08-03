@@ -284,7 +284,6 @@ a:focus {
   button {
     -webkit-user-select: none;
     -moz-user-select: none;
-    -ms-user-select: none;
     user-select: none;
   }
   
@@ -332,7 +331,6 @@ a:focus {
 
 /* Sticky elements mobile optimization */
 .sticky-mobile {
-  position: -webkit-sticky;
   position: sticky;
   z-index: 1000;
 }
@@ -369,8 +367,18 @@ a:focus {
 }
 
 /* Ensure proper iframe responsiveness */
-/* Ensure proper iframe responsiveness */
 iframe.aspect-video {
   width: 100%;
   height: 100%;
+}
+
+/* Accordion Item Styles */
+.accordion-item .body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.accordion-item.is-open .body {
+  max-height: 1200px;
 }

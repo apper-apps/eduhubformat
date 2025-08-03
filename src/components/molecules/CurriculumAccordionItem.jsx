@@ -1,27 +1,19 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import { cn } from '@/utils/cn'
 import ApperIcon from '@/components/ApperIcon'
 
 function CurriculumAccordionItem({ item, index, curriculum, onRemove, onDragEnd }) {
-  const [isOpen, setIsOpen] = useState(false)
-
-  const toggleAccordion = () => {
-    setIsOpen(!isOpen)
-  }
-
   return (
-    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+    <div className="accordion-item bg-white border border-gray-200 rounded-lg overflow-hidden">
       {/* Accordion Header */}
       <button
         type="button"
-        onClick={toggleAccordion}
-        className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-inset"
-        aria-expanded={isOpen}
+        className="accordion-header w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-inset"
       >
         <div className="flex items-center gap-3 flex-1 text-left">
           <ApperIcon 
-            name={isOpen ? "ChevronDown" : "ChevronRight"} 
+            name="ChevronRight"
             size={16} 
             className="text-gray-400 transition-transform duration-200"
           />
@@ -56,12 +48,7 @@ function CurriculumAccordionItem({ item, index, curriculum, onRemove, onDragEnd 
       </button>
 
       {/* Accordion Content */}
-      <div 
-        className={cn(
-          "accordion-content",
-          isOpen ? "accordion-open" : "accordion-closed"
-        )}
-      >
+      <div className="body">
         <div className="p-4 pt-0 border-t border-gray-100">
           <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="curriculum">

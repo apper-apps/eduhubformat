@@ -156,7 +156,7 @@ function CourseManage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center gap-2">
                         <button
-                          onClick={() => navigate(`/courses/${course.Id}/edit`)}
+onClick={() => navigate(`/courses/${course.Id}/edit`)}
                           className="p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
                           title="수정"
                         >
@@ -207,7 +207,7 @@ function CourseManage() {
                 </div>
                 <div className="flex items-center justify-end gap-2">
                   <button
-                    onClick={() => navigate(`/courses/${course.Id}/edit`)}
+onClick={() => navigate(`/courses/${course.Id}/edit`)}
                     className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
                   >
                     <ApperIcon name="Edit" size={14} />

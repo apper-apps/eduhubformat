@@ -153,10 +153,14 @@ export const createCourse = async (courseData) => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
   
-  const newCourse = {
+const newCourse = {
     ...courseData,
     Id: nextId++,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    // Ensure curriculum has proper structure
+    curriculum: courseData.curriculum || [],
+    objectives: courseData.objectives || [],
+    introduction: courseData.introduction || courseData.description || ''
   };
   
   courses.push(newCourse);
@@ -164,7 +168,7 @@ export const createCourse = async (courseData) => {
 };
 
 export const updateCourse = async (id, courseData) => {
-  // Validate ID is integer
+// Validate ID is integer
   if (!Number.isInteger(id) || id <= 0) {
     throw new Error('유효하지 않은 강의 ID입니다.');
   }
@@ -181,7 +185,11 @@ export const updateCourse = async (id, courseData) => {
   courses[index] = {
     ...courses[index],
     ...courseData,
-    Id: id // Ensure ID cannot be changed
+    Id: id, // Ensure ID cannot be changed
+    // Ensure new fields are properly saved
+    curriculum: courseData.curriculum || courses[index].curriculum || [],
+    objectives: courseData.objectives || courses[index].objectives || [],
+    introduction: courseData.introduction || courseData.description || courses[index].introduction || courses[index].description || ''
   };
   
   return { ...courses[index] };

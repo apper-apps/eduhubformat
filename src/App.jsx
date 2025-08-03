@@ -25,8 +25,9 @@ function App() {
               <Route index element={<HomePage />} />
               <Route path="courses" element={<CoursesPage />} />
               <Route path="courses/:id" element={<CourseDetailPage />} />
-              <Route path="courses/manage" element={<CourseManage />} />
+<Route path="courses/manage" element={<CourseManage />} />
               <Route path="courses/new" element={<CourseNew />} />
+              <Route path="courses/:id/edit" element={<CourseNew />} />
               <Route path="/store" element={<StorePage />} />
               <Route path="/product/:id" element={<ProductDetailPage />} />
               <Route path="/reviews" element={<ReviewsPage />} />

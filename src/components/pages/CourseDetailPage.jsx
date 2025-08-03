@@ -74,10 +74,12 @@ const CourseDetailPage = () => {
 const [course, setCourse] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [cohorts, setCohorts] = useState([]);
+const [cohorts, setCohorts] = useState([]);
   const [showCohortModal, setShowCohortModal] = useState(false);
   const [showEnrollmentModal, setShowEnrollmentModal] = useState(false);
 const [selectedCohort, setSelectedCohort] = useState(null);
+  const [openWeeks, setOpenWeeks] = useState(new Set());
+  const [loadedVideos, setLoadedVideos] = useState(new Set());
   const [isEnrolling, setIsEnrolling] = useState(false);
   const [userEnrollment, setUserEnrollment] = useState(null);
   const [enrollmentLoading, setEnrollmentLoading] = useState(true);
@@ -182,6 +184,22 @@ const calculateDaysLeft = (startDate) => {
     const diffTime = start - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays > 0 ? diffDays : 0;
+};
+
+const toggleWeek = (weekNumber) => {
+    setOpenWeeks(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(weekNumber)) {
+        newSet.delete(weekNumber);
+      } else {
+        newSet.add(weekNumber);
+        // Mark video as ready to load when accordion opens
+        if (!loadedVideos.has(weekNumber)) {
+          setLoadedVideos(prev => new Set(prev).add(weekNumber));
+        }
+      }
+      return newSet;
+    });
   };
 
 const handleEnrollClick = () => {
@@ -253,12 +271,66 @@ const nextCohort = getNextCohort();
   };
 
   // Mock curriculum data
+// URL sanitization function
+  const sanitizeUrl = (url) => {
+    if (!url || typeof url !== 'string') return null;
+    
+    try {
+      const urlObj = new URL(url);
+      
+      // Only allow https protocol
+      if (urlObj.protocol !== 'https:') return null;
+      
+      // Only allow YouTube and Vimeo domains
+      const allowedDomains = [
+        'www.youtube.com', 'youtube.com', 'youtu.be',
+        'player.vimeo.com', 'vimeo.com'
+      ];
+      
+      if (!allowedDomains.includes(urlObj.hostname)) return null;
+      
+      return url;
+    } catch (e) {
+      return null;
+    }
+  };
+
   const curriculum = [
-    { week: 1, title: "기초 개념과 환경 설정", lessons: 4, duration: "2시간" },
-    { week: 2, title: "핵심 기능 익히기", lessons: 5, duration: "2.5시간" },
-    { week: 3, title: "실전 프로젝트 시작", lessons: 6, duration: "3시간" },
-    { week: 4, title: "고급 기법과 최적화", lessons: 4, duration: "2시간" },
-    { week: 5, title: "배포와 운영", lessons: 3, duration: "1.5시간" },
+    { 
+      week: 1, 
+      title: "기초 개념과 환경 설정", 
+      lessons: 4, 
+      duration: "2시간",
+      embed_url: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+    },
+    { 
+      week: 2, 
+      title: "핵심 기능 익히기", 
+      lessons: 5, 
+      duration: "2.5시간",
+      embed_url: "https://player.vimeo.com/video/76979871"
+    },
+    { 
+      week: 3, 
+      title: "실전 프로젝트 시작", 
+      lessons: 6, 
+      duration: "3시간",
+      embed_url: "https://www.youtube.com/embed/ScMzIvxBSi4"
+    },
+    { 
+      week: 4, 
+      title: "고급 기법과 최적화", 
+      lessons: 4, 
+      duration: "2시간",
+      embed_url: "https://player.vimeo.com/video/147365861"
+    },
+    { 
+      week: 5, 
+      title: "배포와 운영", 
+      lessons: 3, 
+      duration: "1.5시간",
+      embed_url: "https://www.youtube.com/embed/jNQXAC9IVRw"
+    },
   ];
 
   const learningOutcomes = [
@@ -436,30 +508,89 @@ const nextCohort = getNextCohort();
             <div className="bg-white rounded-xl shadow-card p-6 lg:p-8">
               <h2 className="text-xl font-bold text-gray-900 mb-6">커리큘럼</h2>
               <div className="space-y-4">
-                {curriculum.map((week) => (
-                  <div 
-                    key={week.week}
-                    className="border border-gray-200 rounded-lg p-4 hover:border-primary-300 transition-colors duration-200"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3">
-                          <div className="flex-shrink-0 w-8 h-8 bg-primary-800 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                            {week.week}
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-gray-900">{week.title}</h3>
-                            <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
-                              <span>{week.lessons}개 강의</span>
-                              <span>{week.duration}</span>
+{curriculum.map((week) => {
+                  const isOpen = openWeeks.has(week.week);
+                  const shouldLoadVideo = loadedVideos.has(week.week);
+                  const sanitizedUrl = sanitizeUrl(week.embed_url);
+                  
+                  return (
+                    <div 
+                      key={week.week}
+                      className={cn(
+                        "border border-gray-200 rounded-lg overflow-hidden transition-all duration-300",
+                        isOpen ? "border-primary-300 is-open" : "hover:border-primary-300"
+                      )}
+                    >
+                      <div 
+                        className="p-4 cursor-pointer"
+                        onClick={() => toggleWeek(week.week)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3">
+                              <div className="flex-shrink-0 w-8 h-8 bg-primary-800 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                                {week.week}
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-gray-900">{week.title}</h3>
+                                <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
+                                  <span>{week.lessons}개 강의</span>
+                                  <span>{week.duration}</span>
+                                  {sanitizedUrl && (
+                                    <span className="text-primary-600">영상 포함</span>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           </div>
+                          <ApperIcon 
+                            name="ChevronDown" 
+                            size={20} 
+                            className={cn(
+                              "text-gray-400 transition-transform duration-300",
+                              isOpen && "rotate-180"
+                            )} 
+                          />
                         </div>
-</div>
-                      <ApperIcon name="ChevronDown" size={20} className="text-gray-400" />
+                      </div>
+                      
+                      {/* Collapsible Content */}
+                      <div className={cn(
+                        "accordion-content",
+                        isOpen ? "accordion-open" : "accordion-closed"
+                      )}>
+                        <div className="px-4 pb-4">
+                          <div className="pt-2 border-t border-gray-100">
+                            {sanitizedUrl && shouldLoadVideo ? (
+                              <div className="mt-4">
+                                <iframe 
+                                  src={sanitizedUrl}
+                                  className="w-full aspect-video rounded-xl shadow"
+                                  frameBorder="0"
+                                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                  allowFullScreen
+                                  title={`${week.title} 강의 영상`}
+                                />
+                              </div>
+                            ) : sanitizedUrl ? (
+                              <div className="mt-4 flex items-center justify-center h-48 bg-gray-100 rounded-xl">
+                                <div className="text-center text-gray-500">
+                                  <ApperIcon name="Play" size={32} className="mx-auto mb-2" />
+                                  <p>영상을 로드하는 중...</p>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="mt-4 text-center text-gray-500 py-8">
+                                <ApperIcon name="Video" size={32} className="mx-auto mb-2" />
+                                <p>영상 준비 중입니다</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>

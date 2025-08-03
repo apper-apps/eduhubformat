@@ -1,6 +1,41 @@
-import coursesData from '@/services/mockData/courses.json';
+import coursesData from "@/services/mockData/courses.json";
+import React from "react";
+import Error from "@/components/ui/Error";
 
-let courses = [...coursesData];
+let courses = [...coursesData.map(course => ({
+  ...course,
+  capacity: 30,
+  enrolled: Math.floor(Math.random() * 25) + 5 // Random enrolled between 5-29
+}))];
+
+// Mock cohorts data for each course
+const cohortsByCourse = {
+  1: [
+    { id: 101, name: "12기", startDate: "2024-04-15T09:00:00Z", capacity: 30, enrolled: 18 },
+    { id: 102, name: "13기", startDate: "2024-06-01T09:00:00Z", capacity: 30, enrolled: 3 }
+  ],
+  2: [
+    { id: 201, name: "8기", startDate: "2024-04-20T10:00:00Z", capacity: 25, enrolled: 22 },
+    { id: 202, name: "9기", startDate: "2024-06-15T10:00:00Z", capacity: 25, enrolled: 5 }
+  ],
+  3: [
+    { id: 301, name: "5기", startDate: "2024-05-01T14:00:00Z", capacity: 20, enrolled: 20 },
+    { id: 302, name: "6기", startDate: "2024-07-01T14:00:00Z", capacity: 20, enrolled: 2 }
+  ]
+};
+
+// Generate cohorts for other courses
+for (let i = 4; i <= 12; i++) {
+  cohortsByCourse[i] = [
+    {
+      id: i * 100 + 1,
+      name: `${Math.floor(Math.random() * 10) + 5}기`,
+      startDate: new Date(Date.now() + Math.random() * 60 * 24 * 60 * 60 * 1000).toISOString(),
+      capacity: 25 + Math.floor(Math.random() * 10),
+      enrolled: Math.floor(Math.random() * 20) + 2
+    }
+  ];
+}
 let nextId = Math.max(...coursesData.map(course => course.Id)) + 1;
 
 export const getCourses = async (searchQuery = '', categoryFilter = '', priceRange = {}) => {
@@ -50,6 +85,40 @@ export const getCourseById = async (id) => {
   }
   
   return { ...course };
+};
+
+export const getCohorts = async (courseId) => {
+  // Validate ID is integer
+  if (!Number.isInteger(courseId) || courseId <= 0) {
+    throw new Error('유효하지 않은 강의 ID입니다.');
+  }
+  
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 200));
+  
+  const cohorts = cohortsByCourse[courseId] || [];
+  
+  return [...cohorts];
+};
+
+export const updateCohortEnrollment = async (courseId, cohortId, increment = 1) => {
+  if (!Number.isInteger(courseId) || courseId <= 0) {
+    throw new Error('유효하지 않은 강의 ID입니다.');
+  }
+  
+  const cohorts = cohortsByCourse[courseId];
+  if (!cohorts) {
+    throw new Error('기수 정보를 찾을 수 없습니다.');
+  }
+  
+  const cohort = cohorts.find(c => c.id === cohortId);
+  if (!cohort) {
+    throw new Error('해당 기수를 찾을 수 없습니다.');
+  }
+  
+  cohort.enrolled += increment;
+  
+  return { ...cohort };
 };
 
 export const createCourse = async (courseData) => {
@@ -105,7 +174,7 @@ export const deleteCourse = async (id) => {
     throw new Error('강의를 찾을 수 없습니다.');
   }
   
-  const deletedCourse = courses[index];
+const deletedCourse = courses[index];
   courses.splice(index, 1);
   
   return { ...deletedCourse };

@@ -138,7 +138,7 @@ export const enrollInCourse = async (courseId, cohortId, userId = 1) => {
     });
     
     if (existingEnrollments.length > 0) {
-      throw new Error('이미 해당 강의에 등록되어 있습니다.');
+      throw new Error('이미 해당 기수에 등록되어 있습니다.');
     }
 
     // Get current cohort data
@@ -152,13 +152,14 @@ export const enrollInCourse = async (courseId, cohortId, userId = 1) => {
 
     const cohort = cohorts[0];
     
-// Determine enrollment status based on capacity
+    // Determine enrollment status based on capacity
     const currentEnrolled = cohort.enrolled || 0;
     const status = currentEnrolled < cohort.capacity ? 'enrolled' : 'waitlist';
     
     // Create new enrollment in Apper Collections
     const newEnrollment = await window.Apper.collection('Enrollments').create({
       cohort_id: cohortId,
+      course_id: courseId,
       user_id: userId,
       status: status,
       created_at: new Date().toISOString()

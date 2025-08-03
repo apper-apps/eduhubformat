@@ -2,6 +2,7 @@
   {
     "id": 1,
     "cohort_id": 101,
+    "course_id": 1,
     "user_id": 1,
     "status": "enrolled",
     "created_at": "2024-03-01T10:00:00Z"
@@ -9,6 +10,7 @@
   {
     "id": 2,
     "cohort_id": 201,
+    "course_id": 2,
     "user_id": 1,
     "status": "waitlist",
     "created_at": "2024-03-02T11:00:00Z"

@@ -43,14 +43,14 @@ function CourseManage() {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = async () => {
+const handleDeleteConfirm = async () => {
     if (!courseToDelete) return;
     
     try {
       setDeleteLoading(courseToDelete.Id);
       await deleteCourse(courseToDelete.Id);
-      toast.success('강의가 성공적으로 삭제되었습니다.');
-      await loadCourses(); // Refresh the list
+      toast.success("강의가 삭제되었습니다");
+      await loadCourses(); // refetchCourseList equivalent
       setShowDeleteModal(false);
       setCourseToDelete(null);
     } catch (err) {

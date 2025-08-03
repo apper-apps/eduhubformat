@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { cn } from "@/utils/cn";
 import CourseCard from "@/components/molecules/CourseCard";
 import Loading from "@/components/ui/Loading";
@@ -18,6 +19,9 @@ const CourseGrid = ({ className, limit = null, showFilters = true }) => {
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(9);
+  
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
 
   const categories = ["전체", "프로그래밍", "디자인", "비즈니스", "마케팅", "언어"];
   const sortOptions = [
@@ -129,6 +133,24 @@ const filteredAndSortedCourses = React.useMemo(() => {
 
 return (
     <div className={cn("space-y-6", className)}>
+      {/* Header with Add Course Button */}
+      {showFilters && (
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">강의 목록</h2>
+          {user?.role === 'admin' && (
+            <Button
+              id="AddCourseBtn"
+              variant="primary"
+              onClick={() => navigate('/courses/new')}
+              className="flex items-center gap-2"
+            >
+              <ApperIcon name="Plus" size={16} />
+              신규 강의 등록
+            </Button>
+          )}
+        </div>
+      )}
+      
       {/* Search and Filters */}
       {showFilters && (
         <div className="bg-white rounded-lg shadow-card p-6 space-y-6">
@@ -265,15 +287,42 @@ return (
           description="다른 검색어나 필터 조건을 시도해보세요."
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {paginatedCourses.map((course, index) => (
-            <Link key={course.Id} to={`/courses/${course.Id}`}>
-              <CourseCard
-                course={course}
-                className="animate-fade-in hover:animate-scale-in"
-                style={{ animationDelay: `${index * 100}ms` }}
-              />
-            </Link>
+            <div key={course.Id} className="relative group">
+              <Link to={`/courses/${course.Id}`}>
+                <CourseCard
+                  course={course}
+                  className="animate-fade-in hover:animate-scale-in"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                />
+              </Link>
+              {user?.role === 'admin' && (
+                <div className="card-admin-bar">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigate(`/courses/edit/${course.Id}`);
+                    }}
+                    className="p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
+                    title="강의 수정"
+                  >
+                    <ApperIcon name="Edit" size={16} className="text-gray-600" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      // TODO: Implement delete confirmation modal
+                      console.log('Delete course:', course.Id);
+                    }}
+                    className="p-2 bg-white rounded-full shadow-md hover:bg-red-50 transition-colors"
+                    title="강의 삭제"
+                  >
+                    <ApperIcon name="Trash2" size={16} className="text-red-600" />
+                  </button>
+                </div>
+              )}
+            </div>
           ))}
         </div>
       )}

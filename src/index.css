@@ -382,3 +382,29 @@ iframe.aspect-video {
 .accordion-item.is-open .body {
   max-height: 1200px;
 }
+
+/* Course Card Admin Controls */
+.card-admin-bar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+}
+
+.group:hover .card-admin-bar {
+  opacity: 1;
+}
+
+/* Admin button hover effects */
+.card-admin-bar button {
+  transition: all 0.2s ease;
+}
+
+.card-admin-bar button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}

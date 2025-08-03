@@ -1,10 +1,13 @@
 import React from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/utils/cn";
 import Badge from "@/components/atoms/Badge";
 import Button from "@/components/atoms/Button";
 import ApperIcon from "@/components/ApperIcon";
-
 const CourseCard = ({ course, className, progress, showProgress = false, ...props }) => {
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
   const { title, coverImage, price, cohort, instructor, category } = course;
 
   const formatPrice = (price) => {
@@ -17,7 +20,7 @@ const CourseCard = ({ course, className, progress, showProgress = false, ...prop
   return (
 <div
       className={cn(
-        "card-elevated bg-card-gradient p-0 overflow-hidden group cursor-pointer touch-manipulation active:scale-[0.98] transition-transform duration-200",
+        "card-elevated bg-card-gradient p-0 overflow-hidden group cursor-pointer touch-manipulation active:scale-[0.98] transition-transform duration-200 relative",
         className
       )}
       {...props}

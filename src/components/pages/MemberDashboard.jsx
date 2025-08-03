@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { cn } from '@/utils/cn';
-import { getEnrollmentsByUserId } from '@/services/api/enrollmentService';
-import { getOrdersByUserId, formatPrice, getStatusText, getStatusColor } from '@/services/api/orderService';
-import { getCourseById } from '@/services/api/courseService';
-import ApperIcon from '@/components/ApperIcon';
-import Button from '@/components/atoms/Button';
-import Badge from '@/components/atoms/Badge';
-import Loading from '@/components/ui/Loading';
-import Error from '@/components/ui/Error';
-import Empty from '@/components/ui/Empty';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import { formatPrice, getOrdersByUserId, getStatusColor, getStatusText } from "@/services/api/orderService";
+import { getEnrollmentsByUserId } from "@/services/api/enrollmentService";
+import { getCourseById } from "@/services/api/courseService";
+import ApperIcon from "@/components/ApperIcon";
+import Loading from "@/components/ui/Loading";
+import Error from "@/components/ui/Error";
+import Empty from "@/components/ui/Empty";
+import Badge from "@/components/atoms/Badge";
+import Button from "@/components/atoms/Button";
+import { cn } from "@/utils/cn";
 
 const MemberDashboard = () => {
   const [enrollments, setEnrollments] = useState([]);
@@ -213,12 +213,25 @@ const MemberDashboard = () => {
                           </div>
                         </div>
 
-                        <div className="space-y-2">
+<div className="space-y-2">
                           <Button 
                             className="w-full"
                             onClick={() => handleAccessCourse(course.Id)}
                           >
                             {enrollment.status === 'completed' ? '강의 다시보기' : '강의 계속하기'}
+                          </Button>
+                          
+                          {/* Review Button for Enrolled/Completed Courses */}
+                          <Button 
+                            variant="outline"
+                            className="w-full"
+                            onClick={() => {
+                              // Navigate to review form with course context
+                              window.location.href = `/review/create?type=course&itemId=${course.Id}&title=${encodeURIComponent(course.title)}`;
+                            }}
+                          >
+                            <ApperIcon name="Star" size={14} className="mr-2" />
+                            후기 작성
                           </Button>
                           
                           {/* Materials */}
@@ -320,7 +333,7 @@ const MemberDashboard = () => {
                       </div>
                     </div>
 
-                    {order.status === 'completed' && (
+{order.status === 'completed' && (
                       <div className="border-t border-gray-100 pt-4 mt-4">
                         <div className="flex flex-wrap gap-2">
                           <Button variant="outline" size="small">
@@ -331,6 +344,21 @@ const MemberDashboard = () => {
                             <ApperIcon name="MessageCircle" size={14} className="mr-1" />
                             문의하기
                           </Button>
+                          {/* Review Button for Completed Orders */}
+                          {order.items.map((item, index) => (
+                            <Button 
+                              key={index}
+                              variant="outline" 
+                              size="small"
+                              onClick={() => {
+                                // Navigate to review form with item context
+                                window.location.href = `/review/create?type=${item.type}&itemId=${item.itemId}&title=${encodeURIComponent(item.title)}`;
+                              }}
+                            >
+                              <ApperIcon name="Star" size={14} className="mr-1" />
+                              {item.title} 후기 작성
+                            </Button>
+                          ))}
                         </div>
                       </div>
                     )}

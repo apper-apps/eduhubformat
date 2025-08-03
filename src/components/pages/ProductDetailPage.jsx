@@ -392,7 +392,21 @@ const handleAddToCart = () => {
                   <ApperIcon name="CreditCard" size={20} />
                   <span>바로구매</span>
                 </Button>
-              </div>
+</div>
+              
+              {/* Review Button for Purchased Products */}
+              <Button
+                variant="outline"
+                size="large"
+                className="w-full flex items-center justify-center space-x-2 mt-3"
+                onClick={() => {
+                  // Navigate to review form with product context
+                  window.location.href = `/review/create?type=product&itemId=${product.Id}&title=${encodeURIComponent(product.name)}`;
+                }}
+              >
+                <ApperIcon name="Star" size={20} />
+                <span>후기 작성</span>
+              </Button>
               
               <div className="text-center">
                 <span className="text-sm text-gray-500">

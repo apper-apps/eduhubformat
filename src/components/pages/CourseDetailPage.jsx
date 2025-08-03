@@ -447,14 +447,29 @@ const nextCohort = getNextCohort();
                         ? "수강 신청" 
                         : "대기 신청"
                     }
+}
                   </Button>
+
+                  {/* Review Button for Enrolled Users */}
+                  {userEnrollment && userEnrollment.status === 'enrolled' && (
+                    <Button 
+                      variant="outline"
+                      className="w-full mt-3"
+                      onClick={() => {
+                        // Navigate to review form with course context
+                        window.location.href = `/review/create?type=course&itemId=${course.Id}&title=${encodeURIComponent(course.title)}`;
+                      }}
+                    >
+                      <ApperIcon name="Star" size={16} className="mr-2" />
+                      후기 작성
+                    </Button>
+                  )}
 
                   <div className="text-center text-sm text-gray-600">
                     <p>30일 무조건 환불보장</p>
                   </div>
                 </div>
               </div>
-
               {/* Course Info */}
               <div className="bg-white rounded-xl shadow-card p-6">
                 <h3 className="font-bold text-gray-900 mb-4">강의 정보</h3>

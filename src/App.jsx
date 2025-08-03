@@ -1,17 +1,18 @@
 import React from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
+import { Route, BrowserRouter, Routes } from "react-router-dom";
 import { Provider } from "react-redux";
-import { store } from "@/store/store";
+import { ToastContainer } from "react-toastify";
+import ReviewForm from "@/components/organisms/ReviewForm";
 import "@/index.css";
 import Layout from "@/components/organisms/Layout";
 import HomePage from "@/components/pages/HomePage";
 import CoursesPage from "@/components/pages/CoursesPage";
+import MemberDashboard from "@/components/pages/MemberDashboard";
 import ReviewsPage from "@/components/pages/ReviewsPage";
 import ProductDetailPage from "@/components/pages/ProductDetailPage";
 import StorePage from "@/components/pages/StorePage";
 import CourseDetailPage from "@/components/pages/CourseDetailPage";
-import MemberDashboard from "@/components/pages/MemberDashboard";
+import store from "@/store/store";
 function App() {
   return (
 <Provider store={store}>
@@ -22,13 +23,13 @@ function App() {
               <Route index element={<HomePage />} />
               <Route path="courses" element={<CoursesPage />} />
               <Route path="courses/:id" element={<CourseDetailPage />} />
-              <Route path="store" element={<StorePage />} />
-              <Route path="store/:id" element={<ProductDetailPage />} />
-              <Route path="reviews" element={<ReviewsPage />} />
-              <Route path="dashboard" element={<MemberDashboard />} />
+              <Route path="/store" element={<StorePage />} />
+              <Route path="/product/:id" element={<ProductDetailPage />} />
+              <Route path="/reviews" element={<ReviewsPage />} />
+              <Route path="/review/create" element={<ReviewForm />} />
+              <Route path="/member-dashboard" element={<MemberDashboard />} />
             </Route>
           </Routes>
-        
         <ToastContainer
           position="top-right"
           autoClose={3000}
@@ -39,9 +40,9 @@ function App() {
           pauseOnFocusLoss
           draggable
           pauseOnHover
-          style={{ zIndex: 9999 }}
+style={{ zIndex: 9999 }}
         />
-</div>
+        </div>
       </BrowserRouter>
     </Provider>
   );

@@ -369,8 +369,8 @@ a:focus {
 }
 
 /* Ensure proper iframe responsiveness */
+/* Ensure proper iframe responsiveness */
 iframe.aspect-video {
   width: 100%;
   height: 100%;
-}
 }

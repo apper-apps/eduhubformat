@@ -2,7 +2,9 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 @import 'react-toastify/dist/ReactToastify.css';
-
+@import 'swiper/css';
+@import 'swiper/css/navigation';
+@import 'swiper/css/pagination';
 @layer base {
   * {
     box-sizing: border-box;

@@ -9,8 +9,6 @@ import HomePage from "@/components/pages/HomePage";
 import CoursesPage from "@/components/pages/CoursesPage";
 import MemberDashboard from "@/components/pages/MemberDashboard";
 import ReviewsPage from "@/components/pages/ReviewsPage";
-import ProductDetailPage from "@/components/pages/ProductDetailPage";
-import StorePage from "@/components/pages/StorePage";
 import CourseDetailPage from "@/components/pages/CourseDetailPage";
 import CourseManage from "@/components/pages/CourseManage";
 import CourseNew from "@/components/pages/CourseNew";
@@ -28,8 +26,7 @@ function App() {
 <Route path="courses/manage" element={<CourseManage />} />
               <Route path="courses/new" element={<CourseNew />} />
               <Route path="courses/:id/edit" element={<CourseNew />} />
-              <Route path="/store" element={<StorePage />} />
-              <Route path="/product/:id" element={<ProductDetailPage />} />
+<Route path="/my-courses" element={<MemberDashboard />} />
               <Route path="/reviews" element={<ReviewsPage />} />
               <Route path="/review/create" element={<ReviewForm />} />
               <Route path="/member-dashboard" element={<MemberDashboard />} />

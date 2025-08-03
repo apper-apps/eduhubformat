@@ -4,6 +4,8 @@ import { cn } from "@/utils/cn";
 import { toggleCart } from "@/store/cartSlice";
 import Logo from "@/components/atoms/Logo";
 import NavLink from "@/components/molecules/NavLink";
+import NavDropdown from "@/components/molecules/NavDropdown";
+import NavItem from "@/components/molecules/NavItem";
 import Button from "@/components/atoms/Button";
 import MobileNav from "@/components/molecules/MobileNav";
 import ApperIcon from "@/components/ApperIcon";
@@ -14,23 +16,13 @@ const { totalQuantity } = useSelector(state => state.cart);
   
   // Mock user context - in real app this would come from auth context
   const user = { role: 'admin' }; // For demo purposes, set as admin
+  const isLoggedIn = true; // Mock login status
   
-  const baseNavItems = [
+const navItems = [
     { label: "홈", path: "/" },
-    { label: "강의", path: "/courses" },
-    { label: "스토어", path: "/store" },
     { label: "이용후기", path: "/reviews" },
     { label: "대시보드", path: "/dashboard" },
   ];
-  
-  // Add admin-only navigation items
-  const navItems = user.role === 'admin' 
-    ? [
-        ...baseNavItems.slice(0, 2), // 홈, 강의
-        { label: "강의관리", path: "/courses/manage" }, // Add after 강의
-        ...baseNavItems.slice(2) // Rest of items
-      ]
-    : baseNavItems;
 
   const toggleMobileNav = () => {
     setIsMobileNavOpen(!isMobileNavOpen);
@@ -54,12 +46,17 @@ const { totalQuantity } = useSelector(state => state.cart);
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
+<nav className="hidden md:flex items-center space-x-8">
               {navItems.map((item) => (
                 <NavLink key={item.path} to={item.path}>
                   {item.label}
                 </NavLink>
               ))}
+              <NavDropdown label="강의">
+                <NavItem to="/courses">강의 목록</NavItem>
+                <NavItem to="/courses/manage" visible={user.role === 'admin'}>강의 관리</NavItem>
+                <NavItem to="/my-courses" visible={isLoggedIn}>내 강의</NavItem>
+              </NavDropdown>
             </nav>
 
             {/* Desktop CTA */}
@@ -112,8 +109,14 @@ const { totalQuantity } = useSelector(state => state.cart);
         </div>
       </header>
 
-      {/* Mobile Navigation */}
-      <MobileNav isOpen={isMobileNavOpen} onClose={closeMobileNav} />
+{/* Mobile Navigation */}
+      <MobileNav 
+        isOpen={isMobileNavOpen} 
+        onClose={closeMobileNav}
+        navItems={navItems}
+        user={user}
+        isLoggedIn={isLoggedIn}
+      />
     </>
   );
 };

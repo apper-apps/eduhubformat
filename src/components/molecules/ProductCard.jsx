@@ -34,10 +34,10 @@ const ProductCard = ({ product, className, ...props }) => {
       <Link to={`/store/${product.Id}`} className="block">
         {/* Product Image */}
         <div className="relative aspect-[4/3] overflow-hidden">
-          <img
+<img
             src={product.images[0]}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
           
           {/* Discount Badge */}

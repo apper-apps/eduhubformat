@@ -218,6 +218,7 @@
   overflow-wrap: break-word;
   line-height: 1.7;
 }
+
 /* Focus States */
 *:focus {
   outline: 2px solid #8B5CF6;
@@ -247,5 +248,34 @@ a:focus {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Hide scrollbar for mobile category tabs */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Enhanced touch interactions for mobile */
+@media (max-width: 768px) {
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  /* Improve tap target sizes for mobile */
+  button, select, input {
+    min-height: 44px;
+  }
+}
+
+/* Desktop hover effects for product cards */
+@media (min-width: 769px) {
+  .group:hover .group-hover\:scale-105 {
+    transform: scale(1.05);
   }
 }

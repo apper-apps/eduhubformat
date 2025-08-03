@@ -25,7 +25,7 @@ const StorePage = () => {
     { value: 'price_high', label: '가격 높은순' }
   ];
 
-  useEffect(() => {
+useEffect(() => {
     loadProducts();
   }, []);
 
@@ -94,7 +94,6 @@ const StorePage = () => {
     
     setProducts(sorted);
   };
-
   const filteredProducts = products;
 
   return (
@@ -119,12 +118,12 @@ const StorePage = () => {
         </div>
       </section>
 
-      {/* Search and Filters */}
+{/* Search and Filters */}
       <section className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+          <div className="flex flex-col space-y-6">
             {/* Search Bar */}
-            <div className="relative flex-1 max-w-md">
+            <div className="relative flex-1 max-w-md mx-auto sm:mx-0">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <ApperIcon name="Search" size={20} className="text-gray-400" />
               </div>
@@ -133,23 +132,31 @@ const StorePage = () => {
                 placeholder="상품을 검색하세요..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-base"
               />
             </div>
 
-            {/* Category Filter */}
-            <div className="flex items-center space-x-4">
-              <span className="text-sm font-medium text-gray-700">카테고리:</span>
-              <div className="flex space-x-2">
+            {/* Category Filter Tabs - Mobile Optimized */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700">카테고리</span>
+                <span className="text-xs text-gray-500">
+                  {selectedCategory === '전체' ? '전체보기' : selectedCategory}
+                </span>
+              </div>
+              
+              {/* Mobile: Horizontal Scroll Categories */}
+              <div className="flex overflow-x-auto scrollbar-hide space-x-3 pb-2 sm:pb-0 sm:flex-wrap sm:overflow-visible">
                 {categories.map((category) => (
                   <button
                     key={category}
                     onClick={() => handleCategoryChange(category)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    className={`flex-shrink-0 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 transform active:scale-95 touch-manipulation ${
                       selectedCategory === category
-                        ? 'bg-primary-800 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-primary-800 text-white shadow-lg'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300'
                     }`}
+                    style={{ minWidth: '80px' }}
                   >
                     {category}
                   </button>
@@ -158,12 +165,12 @@ const StorePage = () => {
             </div>
 
             {/* Sort Dropdown */}
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-gray-700">정렬:</span>
+            <div className="flex items-center justify-between sm:justify-start sm:space-x-4">
+              <span className="text-sm font-medium text-gray-700">정렬</span>
               <select
                 value={sortBy}
                 onChange={(e) => handleSortChange(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white min-w-[140px]"
               >
                 {sortOptions.map((option) => (
                   <option key={option.value} value={option.value}>

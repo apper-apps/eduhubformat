@@ -1,17 +1,19 @@
 import React, { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { cn } from "@/utils/cn";
-import { toggleCart } from "@/store/cartSlice";
-import Logo from "@/components/atoms/Logo";
-import NavLink from "@/components/molecules/NavLink";
-import Button from "@/components/atoms/Button";
-import MobileNav from "@/components/molecules/MobileNav";
+import { useDispatch, useSelector } from "react-redux";
+import GlobalSearchBar from "@/components/organisms/GlobalSearchBar";
 import ApperIcon from "@/components/ApperIcon";
-const Header = ({ className }) => {
-  const dispatch = useDispatch();
-  const { totalQuantity } = useSelector(state => state.cart);
-const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+import MobileNav from "@/components/molecules/MobileNav";
+import NavLink from "@/components/molecules/NavLink";
+import Logo from "@/components/atoms/Logo";
+import Button from "@/components/atoms/Button";
+import { toggleCart } from "@/store/cartSlice";
+import { cn } from "@/utils/cn";
 
+const Header = ({ className }) => {
+const dispatch = useDispatch();
+  const { totalQuantity } = useSelector(state => state.cart);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 const navItems = [
     { label: "홈", path: "/" },
     { label: "강의", path: "/courses" },
@@ -41,7 +43,7 @@ const navItems = [
               <Logo size="default" />
             </div>
 
-            {/* Desktop Navigation */}
+{/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
               {navItems.map((item) => (
                 <NavLink key={item.path} to={item.path}>
@@ -50,8 +52,13 @@ const navItems = [
               ))}
             </nav>
 
-            {/* Desktop CTA */}
-<div className="hidden md:flex items-center space-x-4">
+            {/* Global Search Bar */}
+            <div className="hidden md:block flex-1 max-w-md mx-8">
+              <GlobalSearchBar />
+            </div>
+
+{/* Desktop CTA */}
+            <div className="hidden md:flex items-center space-x-4">
               {/* Cart Icon */}
               <button
                 onClick={() => dispatch(toggleCart())}
@@ -71,6 +78,16 @@ const navItems = [
               <Button variant="gradient" size="small">
                 무료 체험
               </Button>
+            </div>
+
+            {/* Mobile Search Toggle */}
+            <div className="md:hidden">
+              <button
+                onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+                className="p-2 text-gray-700 hover:text-primary-800 transition-colors"
+              >
+                <ApperIcon name="Search" size={20} />
+              </button>
             </div>
 
             {/* Mobile Menu Button */}

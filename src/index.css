@@ -279,3 +279,64 @@ a:focus {
     transform: scale(1.05);
   }
 }
+
+/* Search highlight styles */
+mark {
+  background-color: #FEF3C7;
+  color: #92400E;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+/* Search dropdown animations */
+.search-dropdown-enter {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+}
+
+.search-dropdown-enter-active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: all 200ms ease-out;
+}
+
+.search-dropdown-exit {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.search-dropdown-exit-active {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+  transition: all 200ms ease-in;
+}
+
+/* Global search mobile responsiveness */
+@media (max-width: 768px) {
+  .mobile-search-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 z-50;
+  }
+  
+  .mobile-search-container {
+    @apply fixed top-0 left-0 right-0 bg-white p-4 shadow-lg z-50;
+  }
+}
+
+/* Search result pagination */
+.pagination-item:hover {
+  @apply bg-gray-100;
+}
+
+.pagination-item.active {
+  @apply bg-primary-600 text-white;
+}
+
+/* Search suggestion hover effects */
+.search-suggestion:hover {
+  @apply bg-gray-50;
+}
+
+.search-suggestion.selected {
+  @apply bg-primary-50 text-primary-700;
+}

@@ -3,10 +3,35 @@ import coursesData from '@/services/mockData/courses.json';
 let courses = [...coursesData];
 let nextId = Math.max(...coursesData.map(course => course.Id)) + 1;
 
-export const getCourses = async () => {
+export const getCourses = async (searchQuery = '', categoryFilter = '', priceRange = {}) => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 500));
-  return [...courses];
+  
+  let filteredCourses = [...courses];
+  
+  // Apply search filter
+  if (searchQuery.trim()) {
+    filteredCourses = filteredCourses.filter(course => 
+      course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.instructor.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }
+  
+  // Apply category filter
+  if (categoryFilter && categoryFilter !== '전체') {
+    filteredCourses = filteredCourses.filter(course => course.category === categoryFilter);
+  }
+  
+  // Apply price range filter
+  if (priceRange.min !== undefined && priceRange.min !== '') {
+    filteredCourses = filteredCourses.filter(course => course.price >= parseInt(priceRange.min));
+  }
+  if (priceRange.max !== undefined && priceRange.max !== '') {
+    filteredCourses = filteredCourses.filter(course => course.price <= parseInt(priceRange.max));
+  }
+  
+  return filteredCourses;
 };
 
 export const getCourseById = async (id) => {

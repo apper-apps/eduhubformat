@@ -171,13 +171,53 @@
   background-size: 468px 100%;
 }
 
+/* Search and Filter Animations */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.33);
+  }
+  40%, 50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.33);
+  }
+}
+
+.search-focus {
+  animation: pulse-ring 1.5s ease-out;
+}
+
+/* Pagination Animations */
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.pagination-item {
+  animation: bounce-in 0.6s ease-out;
+}
+
 /* Korean Text Optimization */
 .korean-text {
   word-break: keep-all;
   overflow-wrap: break-word;
   line-height: 1.7;
 }
-
 /* Focus States */
 *:focus {
   outline: 2px solid #8B5CF6;

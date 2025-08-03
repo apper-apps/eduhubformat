@@ -4,8 +4,37 @@ import { cn } from '@/utils/cn';
 import Badge from '@/components/atoms/Badge';
 import Button from '@/components/atoms/Button';
 import ApperIcon from '@/components/ApperIcon';
-
 const ProductCard = ({ product, className, ...props }) => {
+  // Stock status helpers
+  const isOutOfStock = product.stock === 0 || !product.isInStock;
+  const isLowStock = product.stock > 0 && product.stock <= 5;
+  
+  const getStockStatus = () => {
+    if (isOutOfStock) {
+      return {
+        text: "품절",
+        color: "text-red-600",
+        bgColor: "bg-red-50",
+        icon: "X"
+      };
+    } else if (isLowStock) {
+      return {
+        text: "재고 부족",
+        color: "text-orange-600", 
+        bgColor: "bg-orange-50",
+        icon: "AlertTriangle"
+      };
+    } else {
+      return {
+        text: `재고 ${product.stock}개`,
+        color: "text-green-600",
+        bgColor: "bg-green-50", 
+        icon: "Check"
+      };
+    }
+  };
+
+  const stockStatus = getStockStatus();
   const formatPrice = (price) => {
     return new Intl.NumberFormat('ko-KR').format(price);
   };
@@ -132,16 +161,18 @@ const ProductCard = ({ product, className, ...props }) => {
           )}
 
           {/* Stock Info */}
-          <div className="flex items-center justify-between text-sm">
+<div className="flex items-center justify-between text-sm">
             <div className="flex items-center space-x-1">
-              <ApperIcon 
-                name={product.isInStock ? "Check" : "X"} 
-                size={16} 
-                className={product.isInStock ? "text-green-600" : "text-red-600"} 
-              />
-              <span className={product.isInStock ? "text-green-600" : "text-red-600"}>
-                {product.isInStock ? `재고 ${product.stock}개` : "품절"}
-              </span>
+              <div className={`flex items-center space-x-1 px-2 py-1 rounded-full ${stockStatus.bgColor}`}>
+                <ApperIcon 
+                  name={stockStatus.icon} 
+                  size={14} 
+                  className={stockStatus.color} 
+                />
+                <span className={`text-xs font-medium ${stockStatus.color}`}>
+                  {stockStatus.text}
+                </span>
+              </div>
             </div>
           </div>
         </div>

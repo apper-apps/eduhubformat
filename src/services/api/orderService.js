@@ -1,5 +1,5 @@
 import { getCourseById } from '@/services/api/courseService';
-import { getProductById } from '@/services/api/productService';
+import { getProductById, reduceStock } from '@/services/api/productService';
 
 let orders = [
   {
@@ -103,6 +103,19 @@ export const updateOrderStatus = async (orderId, status, paymentDate = null) => 
   const order = orders.find(o => o.Id === orderId);
   if (!order) {
     throw new Error('주문을 찾을 수 없습니다.');
+  }
+  
+  // If order is being marked as completed, reduce stock for product items
+  if (status === 'completed' && order.status !== 'completed') {
+    try {
+      for (const item of order.items) {
+        if (item.type === 'product') {
+          await reduceStock(item.itemId, item.quantity);
+        }
+      }
+    } catch (error) {
+      throw new Error(`재고 업데이트 실패: ${error.message}`);
+    }
   }
   
   order.status = status;

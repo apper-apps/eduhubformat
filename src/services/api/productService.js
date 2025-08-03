@@ -85,10 +85,66 @@ export const searchProducts = (query) => {
 };
 
 export const getProductsByCategory = (category) => {
-  if (category === '전체') {
+if (category === '전체') {
     return getProducts();
   }
   
   const filtered = products.filter(product => product.category === category);
   return Promise.resolve([...filtered]);
+};
+
+// Stock management functions
+export const reduceStock = async (productId, quantity) => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 100));
+  
+  const product = products.find(p => p.Id === productId);
+  if (!product) {
+    throw new Error('상품을 찾을 수 없습니다.');
+  }
+  
+  if (product.stock < quantity) {
+    throw new Error('재고가 부족합니다.');
+  }
+  
+  // Reduce stock
+  product.stock -= quantity;
+  
+  // Update stock status
+  if (product.stock === 0) {
+    product.isInStock = false;
+  }
+  
+  return { ...product };
+};
+
+export const checkStockAvailability = async (productId, quantity = 1) => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 50));
+  
+  const product = products.find(p => p.Id === productId);
+  if (!product) {
+    throw new Error('상품을 찾을 수 없습니다.');
+  }
+  
+  return {
+    available: product.stock >= quantity && product.isInStock,
+    currentStock: product.stock,
+    isInStock: product.isInStock,
+    isLowStock: product.stock > 0 && product.stock <= 5
+  };
+};
+
+export const isLowStock = (product) => {
+  return product.stock > 0 && product.stock <= 5;
+};
+
+export const getStockStatus = (product) => {
+  if (product.stock === 0 || !product.isInStock) {
+    return 'out_of_stock';
+  } else if (isLowStock(product)) {
+    return 'low_stock';
+  } else {
+    return 'in_stock';
+  }
 };

@@ -40,7 +40,13 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
 addToCart: (state, action) => {
-      const { productId, name, price, quantity = 1, variants = {}, image } = action.payload;
+      const { productId, name, price, quantity = 1, variants = {}, image, stock = 0, isInStock = true } = action.payload;
+      
+      // Check stock availability
+      if (!isInStock || stock === 0) {
+        toast.error(`${name}은(는) 현재 품절입니다.`);
+        return;
+      }
       
       // Create unique key for variants
       const variantKey = Object.keys(variants).length > 0 
@@ -50,6 +56,21 @@ addToCart: (state, action) => {
       const existingItemIndex = state.items.findIndex(
         item => item.productId === productId && item.variantKey === variantKey
       );
+
+      let totalRequestedQuantity = quantity;
+      if (existingItemIndex >= 0) {
+        totalRequestedQuantity += state.items[existingItemIndex].quantity;
+      }
+      
+      // Check if requested quantity exceeds available stock
+      if (totalRequestedQuantity > stock) {
+        if (stock <= 5) {
+          toast.error(`${name}의 재고가 부족합니다. (재고: ${stock}개)`);
+        } else {
+          toast.error(`요청한 수량이 재고를 초과합니다. (재고: ${stock}개)`);
+        }
+        return;
+      }
 
       if (existingItemIndex >= 0) {
         state.items[existingItemIndex].quantity += quantity;
@@ -72,7 +93,12 @@ addToCart: (state, action) => {
       // Save to localStorage
       saveCartToStorage(state);
       
-      toast.success(`${name}이(가) 장바구니에 추가되었습니다!`);
+      // Show appropriate success message based on stock level
+      if (stock <= 5) {
+        toast.success(`${name}이(가) 장바구니에 추가되었습니다! (재고 부족 상품)`);
+      } else {
+        toast.success(`${name}이(가) 장바구니에 추가되었습니다!`);
+      }
     },
 
 removeFromCart: (state, action) => {

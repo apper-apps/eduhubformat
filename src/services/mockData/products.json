@@ -46,7 +46,7 @@
       "레벨": "초급~고급",
       "포함사항": "온라인 강의 6개월 무료"
     },
-    "stock": 18,
+"stock": 3,
     "isInStock": true,
     "rating": 4.9,
     "reviewCount": 89,
@@ -134,7 +134,7 @@
     "variants": {
       "switches": ["청축", "갈축", "적축"]
     },
-    "stock": 8,
+"stock": 2,
     "isInStock": true,
     "rating": 4.8,
     "reviewCount": 67,
@@ -215,7 +215,7 @@
       "특징": "논슬립, 워셔블",
       "받침대": "메모리폼 손목 쿠션"
     },
-    "stock": 15,
+"stock": 4,
     "isInStock": true,
     "rating": 4.4,
     "reviewCount": 45,

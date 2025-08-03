@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 import Loading from "@/components/ui/Loading";
 import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
 import Button from "@/components/atoms/Button";
 import Badge from "@/components/atoms/Badge";
 import ApperIcon from "@/components/ApperIcon";
-import { getReviews } from "@/services/api/reviewService";
-
+import { getReviews, voteOnReview, getUserVote } from "@/services/api/reviewService";
 const ReviewsPage = () => {
-  const [reviews, setReviews] = useState([]);
+const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("all");
-
+  const [votingStates, setVotingStates] = useState({});
   const loadReviews = async () => {
     try {
       setLoading(true);
@@ -31,10 +31,34 @@ const ReviewsPage = () => {
     }
   };
 
+const handleVote = async (reviewId, voteType) => {
+    setVotingStates(prev => ({
+      ...prev,
+      [reviewId]: { voting: true }
+    }));
+
+    try {
+      const updatedReview = await voteOnReview(reviewId, voteType);
+      
+      // Update the review in the reviews array
+      setReviews(prevReviews => 
+        prevReviews.map(review => 
+          review.Id === reviewId ? updatedReview : review
+        )
+      );
+    } catch (error) {
+      toast.error(error.message || "투표 처리 중 오류가 발생했습니다.");
+    } finally {
+      setVotingStates(prev => ({
+        ...prev,
+        [reviewId]: { voting: false }
+      }));
+    }
+  };
+
   useEffect(() => {
     loadReviews();
   }, []);
-
   const filteredReviews = React.useMemo(() => {
     if (filter === "all") return reviews;
     return reviews.filter(review => review.courseCategory === filter);
@@ -204,14 +228,52 @@ const ReviewsPage = () => {
                       "{review.content}"
                     </blockquote>
                     
-                    {/* Helpful Stats */}
+{/* Helpful Voting */}
                     <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <div className="flex items-center space-x-1">
-                          <ApperIcon name="ThumbsUp" size={16} />
-                          <span>도움됨 {review.helpful}</span>
+                      <div className="flex items-center space-x-4">
+                        {/* Voting Buttons */}
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleVote(review.Id, 'helpful')}
+                            disabled={votingStates[review.Id]?.voting}
+                            className={`flex items-center space-x-1 text-sm transition-all duration-200 ${
+                              getUserVote(review.Id) === 'helpful' 
+                                ? 'text-green-600 bg-green-50 hover:bg-green-100' 
+                                : 'text-gray-500 hover:text-green-600 hover:bg-green-50'
+                            }`}
+                          >
+                            <ApperIcon 
+                              name="ThumbsUp" 
+                              size={16} 
+                              className={votingStates[review.Id]?.voting ? 'animate-pulse' : ''}
+                            />
+                            <span>도움됨 ({review.helpful})</span>
+                          </Button>
+                          
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleVote(review.Id, 'unhelpful')}
+                            disabled={votingStates[review.Id]?.voting}
+                            className={`flex items-center space-x-1 text-sm transition-all duration-200 ${
+                              getUserVote(review.Id) === 'unhelpful' 
+                                ? 'text-red-600 bg-red-50 hover:bg-red-100' 
+                                : 'text-gray-500 hover:text-red-600 hover:bg-red-50'
+                            }`}
+                          >
+                            <ApperIcon 
+                              name="ThumbsDown" 
+                              size={16} 
+                              className={votingStates[review.Id]?.voting ? 'animate-pulse' : ''}
+                            />
+                            <span>도움안됨</span>
+                          </Button>
                         </div>
-                        <div className="flex items-center space-x-1">
+                        
+                        {/* Course Info */}
+                        <div className="flex items-center space-x-1 text-sm text-gray-500">
                           <ApperIcon name="Clock" size={16} />
                           <span>수강 {review.completionWeeks}주차</span>
                         </div>

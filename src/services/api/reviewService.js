@@ -1,4 +1,5 @@
 import reviewsData from "@/services/mockData/reviews.json";
+import { toast } from "react-toastify";
 
 export const getReviews = async () => {
   await new Promise(resolve => setTimeout(resolve, 400));
@@ -75,4 +76,59 @@ export const deleteReview = async (id) => {
   const deletedReview = { ...reviewsData[reviewIndex] };
   reviewsData.splice(reviewIndex, 1);
   return deletedReview;
+};
+
+export const voteOnReview = async (reviewId, voteType) => {
+  // Validate inputs
+  if (!reviewId || !voteType) {
+    throw new Error("리뷰 ID와 투표 유형이 필요합니다.");
+  }
+  
+  if (!['helpful', 'unhelpful'].includes(voteType)) {
+    throw new Error("올바르지 않은 투표 유형입니다.");
+  }
+  
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  const reviewIndex = reviewsData.findIndex(review => review.Id === parseInt(reviewId));
+  if (reviewIndex === -1) {
+    throw new Error("Review not found");
+  }
+  
+  // Check if user has already voted
+  const voteKey = `review_vote_${reviewId}`;
+  const existingVote = localStorage.getItem(voteKey);
+  
+  if (existingVote === voteType) {
+    throw new Error("이미 투표하셨습니다.");
+  }
+  
+  // Handle vote change or new vote
+  if (existingVote === 'helpful' && voteType === 'unhelpful') {
+    // Switch from helpful to unhelpful
+    reviewsData[reviewIndex].helpful = Math.max(0, reviewsData[reviewIndex].helpful - 1);
+    localStorage.setItem(voteKey, voteType);
+    toast.success("투표가 변경되었습니다.");
+  } else if (existingVote === 'unhelpful' && voteType === 'helpful') {
+    // Switch from unhelpful to helpful
+    reviewsData[reviewIndex].helpful += 1;
+    localStorage.setItem(voteKey, voteType);
+    toast.success("투표가 변경되었습니다.");
+  } else if (!existingVote) {
+    // New vote
+    if (voteType === 'helpful') {
+      reviewsData[reviewIndex].helpful += 1;
+      toast.success("도움이 되는 후기로 투표해주셔서 감사합니다!");
+    } else {
+      toast.success("피드백 감사합니다.");
+    }
+    localStorage.setItem(voteKey, voteType);
+  }
+  
+  return { ...reviewsData[reviewIndex] };
+};
+
+export const getUserVote = (reviewId) => {
+  const voteKey = `review_vote_${reviewId}`;
+  return localStorage.getItem(voteKey);
 };

@@ -75,13 +75,32 @@ const handleEnrollClick = () => {
     setShowEnrollmentModal(true);
   };
 
-  const handleEnrollConfirm = async () => {
+const handleEnrollConfirm = async () => {
     if (!selectedCohort) return;
 
     try {
       setIsEnrolling(true);
-      await enrollInCourse(course.Id, selectedCohort.id);
-      toast.success(`${course.title} ${selectedCohort.name} 수강신청이 완료되었습니다!`);
+      
+      // Load Apper SDK if not already loaded
+      if (!window.Apper) {
+        const script = document.createElement('script');
+        script.src = import.meta.env.VITE_APPER_SDK_CDN_URL;
+        script.async = true;
+        document.head.appendChild(script);
+        
+        await new Promise((resolve, reject) => {
+          script.onload = resolve;
+          script.onerror = reject;
+        });
+      }
+
+      const result = await enrollInCourse(course.Id, selectedCohort.id);
+      
+      const statusMessage = result.status === 'enrolled' 
+        ? '수강신청이 완료되었습니다!' 
+        : '대기목록에 등록되었습니다!';
+        
+      toast.success(`${course.title} ${selectedCohort.name} ${statusMessage}`);
       setShowEnrollmentModal(false);
       
       // Refresh cohorts data

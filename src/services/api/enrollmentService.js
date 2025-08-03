@@ -43,37 +43,65 @@ export const enrollInCourse = async (courseId, cohortId, userId = 1) => {
     throw new Error('유효하지 않은 기수 ID입니다.');
   }
   
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // Check if already enrolled
-  const existingEnrollment = enrollments.find(
-    e => e.courseId === courseId && e.userId === userId
-  );
-  
-  if (existingEnrollment) {
-    throw new Error('이미 해당 강의에 등록되어 있습니다.');
-  }
-  
   try {
-    // Update cohort enrollment count
-    const updatedCohort = await updateCohortEnrollment(courseId, cohortId, 1);
+    // Initialize Apper SDK if not already done
+    if (!window.Apper) {
+      throw new Error('Apper SDK가 로드되지 않았습니다.');
+    }
+
+    await window.Apper.init({
+      projectId: import.meta.env.VITE_APPER_PROJECT_ID,
+      publicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+    });
+
+    // Check if already enrolled using Apper Collections
+    const existingEnrollments = await window.Apper.collection('Enrollments').find({
+      where: {
+        cohort_id: cohortId,
+        user_id: userId
+      }
+    });
+    
+    if (existingEnrollments.length > 0) {
+      throw new Error('이미 해당 강의에 등록되어 있습니다.');
+    }
+
+    // Get current cohort data
+    const cohorts = await window.Apper.collection('Cohorts').find({
+      where: { id: cohortId }
+    });
+    
+    if (cohorts.length === 0) {
+      throw new Error('해당 기수를 찾을 수 없습니다.');
+    }
+
+    const cohort = cohorts[0];
     
     // Determine enrollment status based on capacity
-    const status = updatedCohort.enrolled <= updatedCohort.capacity ? 'enrolled' : 'waitlist';
+    const currentEnrolled = cohort.enrolled || 0;
+    const status = currentEnrolled < cohort.capacity ? 'enrolled' : 'waitlist';
     
-    const newEnrollment = {
-      Id: nextEnrollmentId++,
+    // Create new enrollment in Apper Collections
+    const newEnrollment = await window.Apper.collection('Enrollments').create({
+      cohort_id: cohortId,
+      user_id: userId,
+      status: status,
+      created_at: new Date().toISOString()
+    });
+    
+    // Update cohort enrollment count
+    await window.Apper.collection('Cohorts').update(cohortId, {
+      enrolled: currentEnrolled + 1
+    });
+    
+    return {
+      Id: newEnrollment.id,
       courseId,
       cohortId,
       userId,
       status,
-      enrolledAt: new Date().toISOString()
+      enrolledAt: newEnrollment.created_at
     };
-    
-    enrollments.push(newEnrollment);
-    
-    return { ...newEnrollment };
   } catch (error) {
     throw new Error('수강신청 중 오류가 발생했습니다: ' + error.message);
   }

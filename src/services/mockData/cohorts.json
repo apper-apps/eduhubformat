@@ -1,0 +1,50 @@
+[
+  {
+    "id": 101,
+    "course_id": 1,
+    "name": "12기",
+    "start_date": "2024-04-15T09:00:00Z",
+    "capacity": 30,
+    "enrolled": 18
+  },
+  {
+    "id": 102,
+    "course_id": 1,
+    "name": "13기", 
+    "start_date": "2024-06-01T09:00:00Z",
+    "capacity": 30,
+    "enrolled": 3
+  },
+  {
+    "id": 201,
+    "course_id": 2,
+    "name": "8기",
+    "start_date": "2024-04-20T10:00:00Z",
+    "capacity": 25,
+    "enrolled": 22
+  },
+  {
+    "id": 202,
+    "course_id": 2,
+    "name": "9기",
+    "start_date": "2024-06-15T10:00:00Z", 
+    "capacity": 25,
+    "enrolled": 5
+  },
+  {
+    "id": 301,
+    "course_id": 3,
+    "name": "5기",
+    "start_date": "2024-05-01T14:00:00Z",
+    "capacity": 20,
+    "enrolled": 20
+  },
+  {
+    "id": 302,
+    "course_id": 3,
+    "name": "6기",
+    "start_date": "2024-07-01T14:00:00Z",
+    "capacity": 20,
+    "enrolled": 2
+  }
+]

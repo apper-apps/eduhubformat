@@ -96,9 +96,15 @@ export const getCohorts = async (courseId) => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 200));
   
-  const cohorts = cohortsByCourse[courseId] || [];
+const cohorts = cohortsByCourse[courseId] || [];
   
-  return [...cohorts];
+  // Add spots_left calculation to each cohort
+  const cohortsWithSpotsLeft = cohorts.map(cohort => ({
+    ...cohort,
+    spots_left: cohort.capacity - cohort.enrolled
+  }));
+  
+  return [...cohortsWithSpotsLeft];
 };
 
 export const updateCohortEnrollment = async (courseId, cohortId, increment = 1) => {

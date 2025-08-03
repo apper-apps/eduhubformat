@@ -6,6 +6,7 @@ import HomePage from "@/components/pages/HomePage";
 import CoursesPage from "@/components/pages/CoursesPage";
 import CourseDetailPage from "@/components/pages/CourseDetailPage";
 import StorePage from "@/components/pages/StorePage";
+import ProductDetailPage from "@/components/pages/ProductDetailPage";
 import ReviewsPage from "@/components/pages/ReviewsPage";
 function App() {
   return (
@@ -16,7 +17,8 @@ function App() {
             <Route index element={<HomePage />} />
             <Route path="courses" element={<CoursesPage />} />
             <Route path="courses/:id" element={<CourseDetailPage />} />
-            <Route path="store" element={<StorePage />} />
+<Route path="store" element={<StorePage />} />
+            <Route path="store/:id" element={<ProductDetailPage />} />
             <Route path="reviews" element={<ReviewsPage />} />
           </Route>
         </Routes>

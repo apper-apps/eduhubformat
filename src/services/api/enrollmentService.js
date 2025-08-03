@@ -128,8 +128,7 @@ export const enrollInCourse = async (courseId, cohortId, userId = 1) => {
       projectId: import.meta.env.VITE_APPER_PROJECT_ID,
       publicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
     });
-
-    // Check if already enrolled using Apper Collections
+// Check if already enrolled using Apper Collections
     const existingEnrollments = await window.Apper.collection('Enrollments').find({
       where: {
         cohort_id: cohortId,
@@ -157,14 +156,13 @@ export const enrollInCourse = async (courseId, cohortId, userId = 1) => {
     const status = currentEnrolled < cohort.capacity ? 'enrolled' : 'waitlist';
     
     // Create new enrollment in Apper Collections
-    const newEnrollment = await window.Apper.collection('Enrollments').create({
+const newEnrollment = await window.Apper.collection('Enrollments').create({
       cohort_id: cohortId,
       course_id: courseId,
       user_id: userId,
       status: status,
       created_at: new Date().toISOString()
     });
-    
     // Update cohort enrollment count only if successfully enrolled (not waitlisted)
     if (status === 'enrolled') {
       await window.Apper.collection('Cohorts').update(cohortId, {

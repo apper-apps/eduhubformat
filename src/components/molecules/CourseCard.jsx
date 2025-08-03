@@ -4,7 +4,7 @@ import Badge from "@/components/atoms/Badge";
 import Button from "@/components/atoms/Button";
 import ApperIcon from "@/components/ApperIcon";
 
-const CourseCard = ({ course, className, ...props }) => {
+const CourseCard = ({ course, className, progress, showProgress = false, ...props }) => {
   const { title, coverImage, price, cohort, instructor, category } = course;
 
   const formatPrice = (price) => {
@@ -73,17 +73,35 @@ const CourseCard = ({ course, className, ...props }) => {
             </div>
           </div>
 
+{/* Progress Bar for Owned Courses */}
+          {showProgress && typeof progress === 'number' && (
+            <div className="pt-3 border-t border-gray-100">
+              <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                <span>진행률</span>
+                <span className="font-medium">{progress}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-primary-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${Math.min(progress, 100)}%` }}
+                />
+              </div>
+            </div>
+          )}
+
           {/* Course Stats */}
-          <div className="flex items-center justify-between text-sm text-gray-500 pt-2 border-t border-gray-100">
-            <div className="flex items-center space-x-1">
-              <ApperIcon name="Users" size={14} />
-              <span>125명 수강</span>
+          {!showProgress && (
+            <div className="flex items-center justify-between text-sm text-gray-500 pt-2 border-t border-gray-100">
+              <div className="flex items-center space-x-1">
+                <ApperIcon name="Users" size={14} />
+                <span>125명 수강</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <ApperIcon name="Star" size={14} className="text-yellow-400 fill-current" />
+                <span>4.8</span>
+              </div>
             </div>
-            <div className="flex items-center space-x-1">
-              <ApperIcon name="Star" size={14} className="text-yellow-400 fill-current" />
-              <span>4.8</span>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

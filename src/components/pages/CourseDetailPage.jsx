@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { formatPrice } from "@/services/api/orderService";
 import { enrollInCourse } from "@/services/api/enrollmentService";
@@ -85,6 +85,8 @@ const [selectedCohort, setSelectedCohort] = useState(null);
   const [enrollmentLoading, setEnrollmentLoading] = useState(true);
   const [relatedCourses, setRelatedCourses] = useState([]);
   const [recommendationsLoading, setRecommendationsLoading] = useState(true);
+  const [searchParams] = useSearchParams();
+  const isOwned = searchParams.get('owned') === 'true';
 useEffect(() => {
     const loadCourse = async () => {
       try {
@@ -97,8 +99,12 @@ useEffect(() => {
         setCourse(courseData);
         setCohorts(cohortsData);
         
-        // Load user enrollment status
-        await loadUserEnrollment(parseInt(id));
+        // Load user enrollment status only if not accessed as owned
+        if (!isOwned) {
+          await loadUserEnrollment(parseInt(id));
+        } else {
+          setEnrollmentLoading(false);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -154,7 +160,7 @@ loadCourse();
     };
   }, [course]);
 
-  const loadUserEnrollment = async (courseId) => {
+const loadUserEnrollment = async (courseId) => {
     try {
       setEnrollmentLoading(true);
       
@@ -474,125 +480,143 @@ const nextCohort = getNextCohort();
             </div>
           </div>
 
-          {/* Enrollment Section */}
-          <div className="bg-white rounded-xl shadow-card p-8 lg:p-10">
-            <div className="space-y-8">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-primary-800 mb-4">
-                  {formatPrice(course.price)}
+{/* Enrollment Section - Only show if not owned */}
+          {!isOwned && (
+            <div className="bg-white rounded-xl shadow-card p-8 lg:p-10">
+              <div className="space-y-8">
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-primary-800 mb-4">
+                    {formatPrice(course.price)}
+                  </div>
+                  <p className="text-lg text-gray-600">일시불 결제</p>
                 </div>
-                <p className="text-lg text-gray-600">일시불 결제</p>
-              </div>
 
-              {/* D-day and Cohort Selection */}
-              {nextCohort && (
-                <div className="space-y-6">
-                  {/* D-day Display */}
-                  <div className="bg-primary-50 rounded-lg p-6 text-center">
-                    <div className="flex items-center justify-center space-x-2 mb-3">
-                      <ApperIcon name="Clock" size={24} className="text-primary-600" />
-                      <span className="text-2xl font-bold text-primary-800">
-                        ⏳ D-{calculateDDay(nextCohort.startDate)}
-                      </span>
-                    </div>
-                    <p className="text-lg text-primary-600">
-                      {nextCohort.name} 시작까지
-                    </p>
-                  </div>
-
-                  {/* Cohort Dropdown */}
-                  <div className="space-y-3">
-                    <label className="block text-lg font-medium text-gray-700">기수 선택</label>
-                    <div className="relative">
-                      <select 
-                        value={selectedCohort?.id || ''} 
-                        onChange={(e) => {
-                          const cohortId = parseInt(e.target.value);
-                          const cohort = cohorts.find(c => c.id === cohortId);
-                          setSelectedCohort(cohort);
-                        }}
-                        className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
-                      >
-                        <option value="">기수를 선택하세요</option>
-                        {cohorts.map((cohort) => {
-                          const spotsLeft = cohort.capacity - cohort.enrolled;
-                          return (
-                            <option key={cohort.id} value={cohort.id}>
-                              {cohort.name} ({new Date(cohort.startDate).toLocaleDateString('ko-KR')}) - 잔여 {spotsLeft}석
-                            </option>
-                          );
-                        })}
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Selected Cohort Info */}
-                  {selectedCohort && (
-                    <div className="bg-gray-50 rounded-lg p-6">
-                      <div className="flex justify-between items-center mb-3">
-                        <h4 className="text-lg font-semibold text-gray-900">{selectedCohort.name}</h4>
-                        {selectedCohort.capacity - selectedCohort.enrolled === 0 && (
-                          <Badge variant="outline" className="text-orange-600 border-orange-600">
-                            Full
-                          </Badge>
-                        )}
+                {/* D-day and Cohort Selection */}
+                {nextCohort && (
+                  <div className="space-y-6">
+                    {/* D-day Display */}
+                    <div className="bg-primary-50 rounded-lg p-6 text-center">
+                      <div className="flex items-center justify-center space-x-2 mb-3">
+                        <ApperIcon name="Clock" size={24} className="text-primary-600" />
+                        <span className="text-2xl font-bold text-primary-800">
+                          ⏳ D-{calculateDDay(nextCohort.startDate)}
+                        </span>
                       </div>
-                      <div className="text-base text-gray-600 space-y-2">
-                        <p>시작일: {new Date(selectedCohort.startDate).toLocaleDateString('ko-KR')}</p>
-                        <div className="flex justify-between">
-                          <span>잔여석: {selectedCohort.capacity - selectedCohort.enrolled}명</span>
-                          <span>총 {selectedCohort.capacity}명</span>
+                      <p className="text-lg text-primary-600">
+                        {nextCohort.name} 시작까지
+                      </p>
+                    </div>
+
+                    {/* Cohort Dropdown */}
+                    <div className="space-y-3">
+                      <label className="block text-lg font-medium text-gray-700">기수 선택</label>
+                      <div className="relative">
+                        <select 
+                          value={selectedCohort?.id || ''} 
+                          onChange={(e) => {
+                            const cohortId = parseInt(e.target.value);
+                            const cohort = cohorts.find(c => c.id === cohortId);
+                            setSelectedCohort(cohort);
+                          }}
+                          className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
+                        >
+                          <option value="">기수를 선택하세요</option>
+                          {cohorts.map((cohort) => {
+                            const spotsLeft = cohort.capacity - cohort.enrolled;
+                            return (
+                              <option key={cohort.id} value={cohort.id}>
+                                {cohort.name} ({new Date(cohort.startDate).toLocaleDateString('ko-KR')}) - 잔여 {spotsLeft}석
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Selected Cohort Info */}
+                    {selectedCohort && (
+                      <div className="bg-gray-50 rounded-lg p-6">
+                        <div className="flex justify-between items-center mb-3">
+                          <h4 className="text-lg font-semibold text-gray-900">{selectedCohort.name}</h4>
+                          {selectedCohort.capacity - selectedCohort.enrolled === 0 && (
+                            <Badge variant="outline" className="text-orange-600 border-orange-600">
+                              Full
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="text-base text-gray-600 space-y-2">
+                          <p>시작일: {new Date(selectedCohort.startDate).toLocaleDateString('ko-KR')}</p>
+                          <div className="flex justify-between">
+                            <span>잔여석: {selectedCohort.capacity - selectedCohort.enrolled}명</span>
+                            <span>총 {selectedCohort.capacity}명</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <Button 
-                onClick={() => {
-                  if (!selectedCohort) {
-                    toast.error('기수를 선택해주세요.');
-                    return;
-                  }
-                  setShowEnrollmentModal(true);
-                }}
-                className={cn(
-                  "w-full text-xl py-6",
-                  selectedCohort && selectedCohort.capacity - selectedCohort.enrolled > 0 
-                    ? "btn-primary" 
-                    : "bg-orange-500 hover:bg-orange-600 text-white font-semibold"
+                    )}
+                  </div>
                 )}
-                disabled={!selectedCohort}
-              >
-                {!selectedCohort 
-                  ? "기수를 선택하세요"
-                  : selectedCohort.capacity - selectedCohort.enrolled > 0 
-                    ? "수강 신청" 
-                    : "대기 신청"
-                }
-              </Button>
 
-              {/* Review Button for Enrolled Users */}
-              {userEnrollment && userEnrollment.status === 'enrolled' && (
                 <Button 
-                  variant="outline"
-                  className="w-full mt-4 text-lg py-4"
                   onClick={() => {
-                    // Navigate to review form with course context
-                    window.location.href = `/review/create?type=course&itemId=${course.Id}&title=${encodeURIComponent(course.title)}`;
+                    if (!selectedCohort) {
+                      toast.error('기수를 선택해주세요.');
+                      return;
+                    }
+                    setShowEnrollmentModal(true);
                   }}
+                  className={cn(
+                    "w-full text-xl py-6",
+                    selectedCohort && selectedCohort.capacity - selectedCohort.enrolled > 0 
+                      ? "btn-primary" 
+                      : "bg-orange-500 hover:bg-orange-600 text-white font-semibold"
+                  )}
+                  disabled={!selectedCohort}
                 >
-                  <ApperIcon name="Star" size={18} className="mr-2" />
-                  후기 작성
+                  {!selectedCohort 
+                    ? "기수를 선택하세요"
+                    : selectedCohort.capacity - selectedCohort.enrolled > 0 
+                      ? "수강 신청" 
+                      : "대기 신청"
+                  }
                 </Button>
-              )}
 
-              <div className="text-center text-base text-gray-600">
-                <p>30일 무조건 환불보장</p>
+                {/* Review Button for Enrolled Users */}
+                {userEnrollment && userEnrollment.status === 'enrolled' && (
+                  <Button 
+                    variant="outline"
+                    className="w-full mt-4 text-lg py-4"
+                    onClick={() => {
+                      // Navigate to review form with course context
+                      window.location.href = `/review/create?type=course&itemId=${course.Id}&title=${encodeURIComponent(course.title)}`;
+                    }}
+                  >
+                    <ApperIcon name="Star" size={18} className="mr-2" />
+                    후기 작성
+                  </Button>
+                )}
+
+                <div className="text-center text-base text-gray-600">
+                  <p>30일 무조건 환불보장</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Purchase CTA for non-owned courses */}
+          {!isOwned && (
+            <div className="bg-white rounded-xl shadow-card p-8 lg:p-10">
+              <div className="text-center space-y-6">
+                <div className="bg-gray-100 rounded-xl p-12">
+                  <ApperIcon name="Lock" size={48} className="mx-auto mb-4 text-gray-400" />
+                  <h3 className="text-xl font-semibold text-gray-700 mb-2">강의를 구매하고 시청하세요</h3>
+                  <p className="text-gray-500">이 강의의 모든 콘텐츠에 액세스하려면 구매가 필요합니다.</p>
+                </div>
+                <Button className="w-full btn-primary text-xl py-6">
+                  구매하기 - {formatPrice(course.price)}
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Course Tabs */}
           <div className="bg-white rounded-xl shadow-card">
@@ -675,7 +699,7 @@ const nextCohort = getNextCohort();
             </div>
           </div>
 
-          {/* Curriculum */}
+{/* Curriculum - Full access for owned courses, limited for non-owned */}
           <div className="bg-white rounded-xl shadow-card p-8 lg:p-10">
             <h2 className="text-2xl font-bold text-gray-900 mb-8">커리큘럼</h2>
             <div className="space-y-6">
@@ -689,76 +713,106 @@ const nextCohort = getNextCohort();
                     key={week.week}
                     className={cn(
                       "border border-gray-200 rounded-lg overflow-hidden transition-all duration-300",
-                      isOpen ? "border-primary-300 is-open" : "hover:border-primary-300"
+                      isOpen ? "border-primary-300 is-open" : "hover:border-primary-300",
+                      !isOwned && "opacity-75"
                     )}
                   >
                     <div 
                       className="p-6 cursor-pointer"
-                      onClick={() => toggleWeek(week.week)}
+                      onClick={() => isOwned ? toggleWeek(week.week) : null}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-4">
-                            <div className="flex-shrink-0 w-10 h-10 bg-primary-800 text-white rounded-full flex items-center justify-center text-lg font-bold">
-                              {week.week}
+                            <div className={cn(
+                              "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold",
+                              isOwned ? "bg-primary-800 text-white" : "bg-gray-300 text-gray-600"
+                            )}>
+                              {isOwned ? week.week : <ApperIcon name="Lock" size={16} />}
                             </div>
                             <div>
                               <h3 className="text-lg font-semibold text-gray-900">{week.title}</h3>
                               <div className="flex items-center space-x-6 text-base text-gray-600 mt-2">
                                 <span>{week.lessons}개 강의</span>
                                 <span>{week.duration}</span>
-                                {sanitizedUrl && (
+                                {sanitizedUrl && isOwned && (
                                   <span className="text-primary-600">영상 포함</span>
+                                )}
+                                {!isOwned && (
+                                  <span className="text-orange-600 font-medium">구매 필요</span>
                                 )}
                               </div>
                             </div>
                           </div>
                         </div>
-                        <ApperIcon 
-                          name="ChevronDown" 
-                          size={24} 
-                          className={cn(
-                            "text-gray-400 transition-transform duration-300",
-                            isOpen && "rotate-180"
-                          )} 
-                        />
+                        {isOwned && (
+                          <ApperIcon 
+                            name="ChevronDown" 
+                            size={24} 
+                            className={cn(
+                              "text-gray-400 transition-transform duration-300",
+                              isOpen && "rotate-180"
+                            )} 
+                          />
+                        )}
                       </div>
                     </div>
                     
-                    {/* Collapsible Content */}
-                    <div className={cn(
-                      "accordion-content",
-                      isOpen ? "accordion-open" : "accordion-closed"
-                    )}>
-                      <div className="px-6 pb-6">
-                        <div className="pt-4 border-t border-gray-100">
-                          {sanitizedUrl && shouldLoadVideo ? (
-                            <div className="mt-6">
-                              <iframe 
-                                src={sanitizedUrl}
-                                className="w-full aspect-video rounded-xl shadow"
-                                frameBorder="0"
-                                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                                title={`${week.title} 강의 영상`}
-                              />
-                            </div>
-                          ) : sanitizedUrl ? (
-                            <div className="mt-6 flex items-center justify-center h-56 bg-gray-100 rounded-xl">
-                              <div className="text-center text-gray-500">
-                                <ApperIcon name="Play" size={40} className="mx-auto mb-3" />
-                                <p className="text-lg">영상을 로드하는 중...</p>
+                    {/* Collapsible Content - Only for owned courses */}
+                    {isOwned && (
+                      <div className={cn(
+                        "accordion-content",
+                        isOpen ? "accordion-open" : "accordion-closed"
+                      )}>
+                        <div className="px-6 pb-6">
+                          <div className="pt-4 border-t border-gray-100">
+                            {sanitizedUrl && shouldLoadVideo ? (
+                              <div className="mt-6">
+                                <iframe 
+                                  src={sanitizedUrl}
+                                  className="w-full aspect-video rounded-xl shadow"
+                                  frameBorder="0"
+                                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                  allowFullScreen
+                                  title={`${week.title} 강의 영상`}
+                                />
                               </div>
-                            </div>
-                          ) : (
-                            <div className="mt-6 text-center text-gray-500 py-12">
-                              <ApperIcon name="Video" size={40} className="mx-auto mb-3" />
-                              <p className="text-lg">영상 준비 중입니다</p>
-                            </div>
-                          )}
+                            ) : sanitizedUrl ? (
+                              <div className="mt-6 flex items-center justify-center h-56 bg-gray-100 rounded-xl">
+                                <div className="text-center text-gray-500">
+                                  <ApperIcon name="Play" size={40} className="mx-auto mb-3" />
+                                  <p className="text-lg">영상을 로드하는 중...</p>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="mt-6 text-center text-gray-500 py-12">
+                                <ApperIcon name="Video" size={40} className="mx-auto mb-3" />
+                                <p className="text-lg">영상 준비 중입니다</p>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
+                    
+                    {/* Dimmed overlay for non-owned courses */}
+                    {!isOwned && isOpen && (
+                      <div className="px-6 pb-6">
+                        <div className="pt-4 border-t border-gray-100">
+                          <div className="mt-6 flex items-center justify-center h-56 bg-gray-100 rounded-xl relative">
+                            <div className="absolute inset-0 bg-gray-900 bg-opacity-50 rounded-xl flex items-center justify-center">
+                              <div className="text-center text-white">
+                                <ApperIcon name="Lock" size={48} className="mx-auto mb-4" />
+                                <p className="text-lg font-semibold mb-2">구매 후 시청 가능</p>
+                                <Button className="btn-primary">
+                                  구매하기
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}

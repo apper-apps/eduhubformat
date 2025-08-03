@@ -12,6 +12,7 @@ import ReviewsPage from "@/components/pages/ReviewsPage";
 import CourseDetailPage from "@/components/pages/CourseDetailPage";
 import CourseManage from "@/components/pages/CourseManage";
 import CourseNew from "@/components/pages/CourseNew";
+import MyCourses from "@/components/pages/MyCourses";
 import store from "@/store/store";
 function App() {
   return (
@@ -26,7 +27,7 @@ function App() {
 <Route path="courses/manage" element={<CourseManage />} />
               <Route path="courses/new" element={<CourseNew />} />
               <Route path="courses/:id/edit" element={<CourseNew />} />
-<Route path="/my-courses" element={<MemberDashboard />} />
+<Route path="/my-courses" element={<MyCourses />} />
               <Route path="/reviews" element={<ReviewsPage />} />
               <Route path="/review/create" element={<ReviewForm />} />
               <Route path="/member-dashboard" element={<MemberDashboard />} />

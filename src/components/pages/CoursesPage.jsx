@@ -1,10 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { motion } from "framer-motion";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import CourseGrid from "@/components/organisms/CourseGrid";
 import ApperIcon from "@/components/ApperIcon";
 import CourseFormDrawer from "@/components/organisms/CourseFormDrawer";
+
+// Lazy load CourseGrid for code splitting
+const CourseGrid = React.lazy(() => import("@/components/organisms/CourseGrid"));
+
+// Skeleton loading component for CourseGrid fallback
+const SkeletonGrid = () => (
+  <div className="space-y-8">
+    {/* Filter skeleton */}
+    <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+      <div className="flex flex-wrap gap-2">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="h-10 w-20 bg-gray-200 rounded-lg shimmer" />
+        ))}
+      </div>
+      <div className="flex gap-3">
+        <div className="h-10 w-32 bg-gray-200 rounded-lg shimmer" />
+        <div className="h-10 w-40 bg-gray-200 rounded-lg shimmer" />
+      </div>
+    </div>
+    
+    {/* Course cards skeleton */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {[...Array(8)].map((_, i) => (
+        <div key={i} className="bg-white rounded-lg shadow-card overflow-hidden">
+          <div className="h-48 bg-gray-200 shimmer" />
+          <div className="p-4 space-y-3">
+            <div className="h-6 bg-gray-200 rounded shimmer" />
+            <div className="h-4 bg-gray-200 rounded w-3/4 shimmer" />
+            <div className="flex justify-between items-center">
+              <div className="h-5 bg-gray-200 rounded w-20 shimmer" />
+              <div className="h-6 bg-gray-200 rounded w-16 shimmer" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 const CoursesPage = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
@@ -79,11 +117,13 @@ const canManageCourses = user; // Allow all authenticated users to manage course
 <section className="py-8 md:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <CourseGrid showFilters={true} />
+            <Suspense fallback={<SkeletonGrid />}>
+              <CourseGrid showFilters={true} />
+            </Suspense>
           </motion.div>
         </div>
       </section>

@@ -407,32 +407,6 @@ iframe.aspect-video {
 }
 
 .card-admin-bar button:hover {
-transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* Admin Overlay Styles */
-.admin-overlay {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  display: flex;
-  gap: 8px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 10;
-}
-
-.group:hover .admin-overlay {
-  opacity: 1;
-}
-
-/* Admin overlay button hover effects */
-.admin-overlay button {
-  transition: all 0.2s ease;
-}
-
-.admin-overlay button:hover {
   transform: scale(1.05);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }

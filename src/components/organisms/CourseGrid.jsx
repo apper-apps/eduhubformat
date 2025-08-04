@@ -15,11 +15,11 @@ const CourseGrid = ({ className, limit = null, showFilters = true }) => {
   const [error, setError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [sortBy, setSortBy] = useState("popularity");
-const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(9);
-  const [isManaging, setIsManaging] = useState(false);
+  
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
 
@@ -135,30 +135,18 @@ return (
     <div className={cn("space-y-6", className)}>
       {/* Header with Add Course Button */}
       {showFilters && (
-<div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">강의 목록</h2>
           {user?.role === 'admin' && (
-            <div className="flex items-center gap-3">
-              <Button
-                id="ManageToggleBtn"
-                variant={isManaging ? 'secondary' : 'primary'}
-                onClick={() => setIsManaging(!isManaging)}
-                className="flex items-center gap-2"
-              >
-                {isManaging ? '관리모드 종료' : '강의관리'}
-              </Button>
-              {isManaging && (
-                <Button
-                  id="AddCourseBtn"
-                  variant="primary"
-                  onClick={() => navigate('/courses/new')}
-                  className="flex items-center gap-2"
-                >
-                  <ApperIcon name="Plus" size={16} />
-                  신규 등록
-                </Button>
-              )}
-            </div>
+            <Button
+              id="AddCourseBtn"
+              variant="primary"
+              onClick={() => navigate('/courses/new')}
+              className="flex items-center gap-2"
+            >
+              <ApperIcon name="Plus" size={16} />
+              신규 강의 등록
+            </Button>
           )}
         </div>
       )}
@@ -301,7 +289,7 @@ return (
       ) : (
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {paginatedCourses.map((course, index) => (
-<div key={course.Id} className="relative group">
+            <div key={course.Id} className="relative group">
               <Link to={`/courses/${course.Id}`}>
                 <CourseCard
                   course={course}
@@ -309,14 +297,14 @@ return (
                   style={{ animationDelay: `${index * 100}ms` }}
                 />
               </Link>
-              {user?.role === 'admin' && isManaging && (
-                <div className="admin-overlay">
+              {user?.role === 'admin' && (
+                <div className="card-admin-bar">
                   <button
                     onClick={(e) => {
                       e.preventDefault();
                       navigate(`/courses/edit/${course.Id}`);
                     }}
-                    className="p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-all duration-200"
+                    className="p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
                     title="강의 수정"
                   >
                     <ApperIcon name="Edit" size={16} className="text-gray-600" />
@@ -324,12 +312,10 @@ return (
                   <button
                     onClick={(e) => {
                       e.preventDefault();
-                      if (window.confirm('정말로 이 강의를 삭제하시겠습니까?')) {
-                        // TODO: Implement actual delete functionality
-                        console.log('Delete course:', course.Id);
-                      }
+                      // TODO: Implement delete confirmation modal
+                      console.log('Delete course:', course.Id);
                     }}
-                    className="p-2 bg-white rounded-full shadow-md hover:bg-red-50 transition-all duration-200"
+                    className="p-2 bg-white rounded-full shadow-md hover:bg-red-50 transition-colors"
                     title="강의 삭제"
                   >
                     <ApperIcon name="Trash2" size={16} className="text-red-600" />

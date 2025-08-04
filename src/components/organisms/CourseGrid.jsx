@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 import { cn } from "@/utils/cn";
 import CourseCard from "@/components/molecules/CourseCard";
 import Loading from "@/components/ui/Loading";
@@ -8,7 +9,7 @@ import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
 import Button from "@/components/atoms/Button";
 import ApperIcon from "@/components/ApperIcon";
-import { getCourses } from "@/services/api/courseService";
+import { getCourses, deleteCourse } from "@/services/api/courseService";
 const CourseGrid = ({ className, limit = null, showFilters = true }) => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -297,7 +298,7 @@ return (
                   style={{ animationDelay: `${index * 100}ms` }}
                 />
               </Link>
-              {user?.role === 'admin' && (
+{(user?.role === 'admin' || user?.role === 'instructor') && (
                 <div className="card-admin-bar">
                   <button
                     onClick={(e) => {
@@ -310,10 +311,17 @@ return (
                     <ApperIcon name="Edit" size={16} className="text-gray-600" />
                   </button>
                   <button
-                    onClick={(e) => {
+                    onClick={async (e) => {
                       e.preventDefault();
-                      // TODO: Implement delete confirmation modal
-                      console.log('Delete course:', course.Id);
+                      if (window.confirm('정말로 이 강의를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+                        try {
+                          await deleteCourse(course.Id);
+                          toast.success('강의가 성공적으로 삭제되었습니다.');
+                          loadCourses(); // Refresh the course list
+                        } catch (error) {
+                          toast.error(error.message || '강의 삭제에 실패했습니다.');
+                        }
+                      }
                     }}
                     className="p-2 bg-white rounded-full shadow-md hover:bg-red-50 transition-colors"
                     title="강의 삭제"

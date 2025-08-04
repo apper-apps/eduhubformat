@@ -233,7 +233,7 @@ const handleSubmit = async (e) => {
         toast.success('강의가 성공적으로 등록되었습니다.');
       }
       
-      navigate('/courses/manage');
+      navigate('/courses');
     } catch (err) {
       toast.error(err.message || `강의 ${isEditMode ? '수정' : '등록'}에 실패했습니다.`);
     } finally {

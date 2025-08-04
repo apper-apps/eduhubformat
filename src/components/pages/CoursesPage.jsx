@@ -1,9 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 import CourseGrid from "@/components/organisms/CourseGrid";
 import ApperIcon from "@/components/ApperIcon";
-
+import CourseFormDrawer from "@/components/organisms/CourseFormDrawer";
 const CoursesPage = () => {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [editingCourse, setEditingCourse] = useState(null);
+  const user = useSelector(state => state.auth.user);
+  
+  const handleOpenDrawer = (course = null) => {
+    setEditingCourse(course);
+    setIsDrawerOpen(true);
+  };
+  
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+    setEditingCourse(null);
+  };
+  
+  const handleCourseCreated = () => {
+    handleCloseDrawer();
+    toast.success('강의가 성공적으로 등록되었습니다.');
+  };
+  
+  const handleCourseUpdated = () => {
+    handleCloseDrawer();
+    toast.success('강의가 성공적으로 수정되었습니다.');
+  };
+
+  // Check if user has permission to add courses
+  const canManageCourses = user && (user.role === 'admin' || user.role === 'instructor');
+
   return (
     <div className="min-h-screen bg-stone-50">
       {/* Page Header */}
@@ -92,7 +121,27 @@ const CoursesPage = () => {
             </div>
           </motion.div>
         </div>
-      </section>
+</section>
+
+      {/* Floating Action Button */}
+      {canManageCourses && (
+        <button
+          onClick={() => handleOpenDrawer()}
+          className="fixed bottom-6 right-6 z-40 bg-primary-800 hover:bg-primary-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 group"
+          title="강의 등록"
+        >
+          <ApperIcon name="Plus" size={24} className="group-hover:rotate-90 transition-transform duration-300" />
+        </button>
+      )}
+
+      {/* Course Form Drawer */}
+      <CourseFormDrawer
+        isOpen={isDrawerOpen}
+        onClose={handleCloseDrawer}
+        editingCourse={editingCourse}
+        onCourseCreated={handleCourseCreated}
+        onCourseUpdated={handleCourseUpdated}
+      />
     </div>
   );
 };

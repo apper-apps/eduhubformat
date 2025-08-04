@@ -148,35 +148,5 @@
     "rating": 4.7,
     "level": "초급",
     "createdAt": "2024-03-10T17:40:00Z"
-  },
-  {
-    "Id": 11,
-    "title": "퍼포먼스 마케팅: 구글 & 페이스북 광고 마스터",
-    "coverImage": "https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=800&h=450&fit=crop&crop=center",
-    "price": 259000,
-    "cohort": "9기",
-    "category": "마케팅",
-    "instructor": "조광고",
-    "description": "ROI 극대화를 위한 구글 애즈와 페이스북 광고 운영 전략을 실무 사례로 배우세요.",
-    "duration": "6주",
-    "students": 789,
-    "rating": 4.8,
-    "level": "중급",
-    "createdAt": "2024-03-15T08:55:00Z"
-  },
-  {
-    "Id": 12,
-    "title": "재무 관리 & 투자: 개인 자산 관리의 모든 것",
-    "coverImage": "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=450&fit=crop&crop=center",
-    "price": 179000,
-    "cohort": "13기",
-    "category": "비즈니스",
-    "instructor": "김재무",
-    "description": "가계부 작성부터 투자 포트폴리오 구성까지, 스마트한 자산 관리 방법을 배우세요.",
-    "duration": "5주",
-    "students": 1356,
-    "rating": 4.6,
-    "level": "초급",
-    "createdAt": "2024-03-20T14:30:00Z"
   }
 ]

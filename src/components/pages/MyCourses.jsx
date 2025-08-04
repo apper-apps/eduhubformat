@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { getPurchasesByUserId } from '@/services/api/purchaseService';
-import { getCourseById } from '@/services/api/courseService';
 import CourseCard from '@/components/molecules/CourseCard';
 import Loading from '@/components/ui/Loading';
 import Error from '@/components/ui/Error';
@@ -11,6 +9,98 @@ import Empty from '@/components/ui/Empty';
 import ApperIcon from '@/components/ApperIcon';
 import Button from '@/components/atoms/Button';
 import { cn } from '@/utils/cn';
+
+// Local mock courses data - exactly 10 items
+const mockCourses = [
+  {
+    "Id": 1,
+    "title": "React 마스터클래스: 현대적 웹 개발의 모든 것",
+    "coverImage": "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&h=450&fit=crop&crop=center",
+    "price": 299000,
+    "cohort": "12기",
+    "category": "프로그래밍",
+    "instructor": "김개발",
+    "description": "React 18의 최신 기능부터 Next.js까지, 현대적인 프론트엔드 개발을 마스터하세요.",
+    "duration": "8주",
+    "students": 1247,
+    "rating": 4.9,
+    "level": "중급",
+    "createdAt": "2024-01-15T09:00:00Z"
+  },
+  {
+    "Id": 2,
+    "title": "UI/UX 디자인 완전정복: 피그마로 배우는 실무 디자인",
+    "coverImage": "https://images.unsplash.com/photo-1559028006-448665bd7c7f?w=800&h=450&fit=crop&crop=center",
+    "price": 249000,
+    "cohort": "8기",
+    "category": "디자인",
+    "instructor": "박디자인",
+    "description": "사용자 중심의 디자인 사고부터 실제 앱 디자인까지, 전문 디자이너로 성장하세요.",
+    "duration": "10주",
+    "students": 892,
+    "rating": 4.8,
+    "level": "초급",
+    "createdAt": "2024-01-20T10:30:00Z"
+  },
+  {
+    "Id": 5,
+    "title": "Python 데이터 분석: 입문부터 실무까지",
+    "coverImage": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=450&fit=crop&crop=center",
+    "price": 279000,
+    "cohort": "7기",
+    "category": "프로그래밍",
+    "instructor": "정데이터",
+    "description": "Pandas, NumPy부터 머신러닝까지, 데이터 분석의 전 과정을 실습으로 배우세요.",
+    "duration": "9주",
+    "students": 823,
+    "rating": 4.8,
+    "level": "초급",
+    "createdAt": "2024-02-15T16:20:00Z"
+  }
+];
+
+// Local mock purchases data - only 3 items matching first 3 courses
+const mockPurchases = [
+  {
+    Id: 1,
+    userId: 1,
+    courseId: 1,
+    purchaseDate: '2024-03-01T10:00:00Z',
+    price: 299000,
+    status: 'completed',
+    progress: 75,
+    lastAccessedAt: '2024-12-28T14:30:00Z',
+    completedLessons: 12,
+    totalLessons: 16,
+    certificateEarned: false
+  },
+  {
+    Id: 2,
+    userId: 1,
+    courseId: 2,
+    purchaseDate: '2024-03-02T11:00:00Z',
+    price: 249000,
+    status: 'completed',
+    progress: 45,
+    lastAccessedAt: '2024-12-27T09:15:00Z',
+    completedLessons: 9,
+    totalLessons: 20,
+    certificateEarned: false
+  },
+  {
+    Id: 3,
+    userId: 1,
+    courseId: 5,
+    purchaseDate: '2024-02-15T16:20:00Z',
+    price: 279000,
+    status: 'completed',
+    progress: 100,
+    lastAccessedAt: '2024-04-10T18:45:00Z',
+    completedLessons: 18,
+    totalLessons: 18,
+    certificateEarned: true
+  }
+];
 
 const MyCourses = () => {
   const navigate = useNavigate();
@@ -34,17 +124,20 @@ const MyCourses = () => {
     if (!isAuthenticated || !user) return;
 
     const loadMyCourses = async () => {
-      try {
+try {
         setIsLoading(true);
         setError(null);
 
-        // Get user's purchases
-        const purchases = await getPurchasesByUserId(user.id || 1); // Use actual user ID or fallback to 1 for demo
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        // Use local mock data instead of API calls
+        const purchases = mockPurchases.filter(purchase => purchase.userId === (user.id || 1));
         
-        // Get course details for each purchase
-        const coursePromises = purchases.map(async (purchase) => {
-          try {
-            const course = await getCourseById(purchase.courseId);
+        // Map purchases to courses with local mock data
+        const validCourses = purchases.map(purchase => {
+          const course = mockCourses.find(c => c.Id === purchase.courseId);
+          if (course) {
             return {
               ...course,
               purchaseId: purchase.Id,
@@ -55,14 +148,9 @@ const MyCourses = () => {
               certificateEarned: purchase.certificateEarned,
               purchaseDate: purchase.purchaseDate
             };
-          } catch (err) {
-            console.warn(`Failed to load course ${purchase.courseId}:`, err);
-            return null;
           }
-        });
-
-        const courseResults = await Promise.all(coursePromises);
-        const validCourses = courseResults.filter(course => course !== null);
+          return null;
+        }).filter(course => course !== null);
         
         setCourses(validCourses);
       } catch (err) {
@@ -76,7 +164,6 @@ const MyCourses = () => {
 
     loadMyCourses();
   }, [isAuthenticated, user]);
-
   // Filter courses based on selected filter
   const filteredCourses = courses.filter(course => {
     switch (filter) {

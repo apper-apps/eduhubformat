@@ -94,14 +94,14 @@ const CourseCard = ({ course, className, progress, showProgress = false, ...prop
 
           {/* Course Stats */}
           {!showProgress && (
-            <div className="flex items-center justify-between text-sm text-gray-500 pt-2 border-t border-gray-100">
+<div className="flex items-center justify-between text-sm text-gray-500 pt-2 border-t border-gray-100">
               <div className="flex items-center space-x-1">
                 <ApperIcon name="Users" size={14} />
-                <span>125명 수강</span>
+                <span>{course.students ? `${course.students.toLocaleString()}명 수강` : '수강생 정보 없음'}</span>
               </div>
               <div className="flex items-center space-x-1">
                 <ApperIcon name="Star" size={14} className="text-yellow-400 fill-current" />
-                <span>4.8</span>
+                <span>{course.rating ? course.rating.toFixed(1) : 'N/A'}</span>
               </div>
             </div>
           )}

@@ -25,8 +25,8 @@ function App() {
               <Route path="courses" element={<CoursesPage />} />
               <Route path="courses/:id" element={<CourseDetailPage />} />
               <Route path="courses/manage" element={<Navigate to="/courses" replace />} />
-              <Route path="courses/new" element={<CourseNew />} />
-              <Route path="courses/:id/edit" element={<CourseNew />} />
+<Route path="courses/edit/:id" element={<CourseNew />} />
+              <Route path="/my-courses" element={<MyCourses />} />
               <Route path="/my-courses" element={<MyCourses />} />
               <Route path="/reviews" element={<ReviewsPage />} />
               <Route path="/review/create" element={<ReviewForm />} />

@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { cn } from "@/utils/cn";
+import { deleteCourse, getCourses } from "@/services/api/courseService";
+import ApperIcon from "@/components/ApperIcon";
 import CourseCard from "@/components/molecules/CourseCard";
+import CourseFormDrawer from "@/components/organisms/CourseFormDrawer";
 import Loading from "@/components/ui/Loading";
 import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
 import Button from "@/components/atoms/Button";
-import ApperIcon from "@/components/ApperIcon";
-import { getCourses, deleteCourse } from "@/services/api/courseService";
+import { cn } from "@/utils/cn";
 const CourseGrid = ({ className, limit = null, showFilters = true }) => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,11 +19,12 @@ const CourseGrid = ({ className, limit = null, showFilters = true }) => {
   const [sortBy, setSortBy] = useState("popularity");
   const [searchQuery, setSearchQuery] = useState("");
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(9);
-  
-  const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
+const [currentPage, setCurrentPage] = useState(1);
+const [itemsPerPage] = useState(9);
+const [showCourseForm, setShowCourseForm] = useState(false);
+
+const navigate = useNavigate();
+const { user } = useSelector((state) => state.auth);
 
   const categories = ["전체", "프로그래밍", "디자인", "비즈니스", "마케팅", "언어"];
   const sortOptions = [
@@ -117,9 +119,19 @@ const filteredAndSortedCourses = React.useMemo(() => {
     setSearchQuery("");
     setPriceRange({ min: "", max: "" });
     setSortBy("popularity");
-    setCurrentPage(1);
-  };
+setSortBy("popularity");
+setCurrentPage(1);
+};
 
+const handleCourseCreated = () => {
+setShowCourseForm(false);
+toast.success("새 강의가 성공적으로 등록되었습니다!");
+loadCourses(); // Refresh the course list
+};
+
+const handleOpenCourseForm = () => {
+setShowCourseForm(true);
+};
   if (loading) {
     return <Loading className={className} />;
   }
@@ -133,24 +145,38 @@ const filteredAndSortedCourses = React.useMemo(() => {
   }
 
 return (
-    <div className={cn("space-y-6", className)}>
-      {/* Header with Add Course Button */}
-      {showFilters && (
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">강의 목록</h2>
-{user && (
-            <Button
-              id="AddCourseBtn"
-              variant="primary"
-              onClick={() => navigate('/courses/new')}
-              className="flex items-center gap-2"
-            >
-              <ApperIcon name="Plus" size={16} />
-              신규 강의 등록
-            </Button>
-          )}
-        </div>
-      )}
+<div className={cn("space-y-6", className)}>
+{/* Header with Add Course Button */}
+{showFilters && (
+<div className="flex justify-between items-center mb-6">
+<h2 className="text-2xl font-bold text-gray-900">강의 목록</h2>
+{/* Desktop Add Course Button */}
+<div className="hidden md:block">
+<Button
+id="AddCourseBtn"
+variant="primary"
+onClick={handleOpenCourseForm}
+className="flex items-center gap-2"
+title="새 강의 만들기"
+>
+<ApperIcon name="Plus" size={16} />
+강의 등록
+</Button>
+</div>
+</div>
+)}
+
+{/* Mobile Floating Action Button */}
+<div className="md:hidden">
+<button
+onClick={handleOpenCourseForm}
+className="floating-action-button"
+title="새 강의 만들기"
+aria-label="새 강의 등록"
+>
+<ApperIcon name="Plus" size={20} />
+</button>
+</div>
       
       {/* Search and Filters */}
       {showFilters && (
@@ -401,13 +427,18 @@ return (
       {limit && filteredAndSortedCourses.length >= limit && (
         <div className="text-center pt-8">
           <Button variant="outline" size="large">
-            <ApperIcon name="Plus" size={20} className="mr-2" />
-            더 많은 강의 보기
+더 많은 강의 보기
           </Button>
         </div>
       )}
+
+      {/* Course Form Drawer */}
+      <CourseFormDrawer
+        isOpen={showCourseForm}
+        onClose={() => setShowCourseForm(false)}
+        onCourseCreated={handleCourseCreated}
+      />
     </div>
   );
-};
 
 export default CourseGrid;

@@ -138,7 +138,7 @@ return (
       {showFilters && (
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">강의 목록</h2>
-          {user?.role === 'admin' && (
+{user && (
             <Button
               id="AddCourseBtn"
               variant="primary"

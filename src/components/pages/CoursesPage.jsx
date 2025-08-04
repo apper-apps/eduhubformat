@@ -31,7 +31,7 @@ const CoursesPage = () => {
   };
 
   // Check if user has permission to add courses
-  const canManageCourses = user && (user.role === 'admin' || user.role === 'instructor');
+const canManageCourses = user; // Allow all authenticated users to manage courses
 
   return (
     <div className="min-h-screen bg-stone-50">

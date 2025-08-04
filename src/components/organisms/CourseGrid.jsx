@@ -114,20 +114,19 @@ const filteredAndSortedCourses = React.useMemo(() => {
     setCurrentPage(1);
   }, [selectedCategory, sortBy, searchQuery, priceRange]);
 
-  const handleClearFilters = () => {
+const handleClearFilters = () => {
     setSelectedCategory("전체");
     setSearchQuery("");
     setPriceRange({ min: "", max: "" });
     setSortBy("popularity");
-setSortBy("popularity");
-setCurrentPage(1);
-};
+    setCurrentPage(1);
+  };
 
-const handleCourseCreated = () => {
-setShowCourseForm(false);
-toast.success("새 강의가 성공적으로 등록되었습니다!");
-loadCourses(); // Refresh the course list
-};
+  const handleCourseCreated = () => {
+    setShowCourseForm(false);
+    toast.success("새 강의가 성공적으로 등록되었습니다!");
+    loadCourses(); // Refresh the course list
+  };
 
 const handleOpenCourseForm = () => {
 setShowCourseForm(true);
@@ -438,7 +437,8 @@ aria-label="새 강의 등록"
         onClose={() => setShowCourseForm(false)}
         onCourseCreated={handleCourseCreated}
       />
-    </div>
+</div>
   );
+};
 
 export default CourseGrid;

@@ -1,23 +1,47 @@
-import React from 'react';
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useContext } from 'react';
+import { AuthContext } from '../../App';
 
-const Login = () => {
+function Login() {
+  const { isInitialized } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (isInitialized) {
+      // Show login UI in this component
+      const { ApperUI } = window.ApperSDK;
+      ApperUI.showLogin("#authentication");
+    }
+  }, [isInitialized]);
+
   return (
-    <div className="min-h-screen bg-stone-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-card p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">로그인</h1>
-          <p className="text-gray-600">EduHub Pro에 로그인하세요</p>
-        </div>
-        
-        <div className="text-center">
-          <div className="text-gray-500 mb-4">
-            Apper-SDK 인증이 자동으로 처리됩니다...
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="w-full max-w-md space-y-8 p-8 bg-surface rounded-lg shadow-md border border-gray-600">
+        <div className="flex flex-col gap-6 items-center justify-center">
+          <div className="w-14 h-14 shrink-0 rounded-xl flex items-center justify-center bg-gradient-to-r from-primary to-accent text-white text-2xl 2xl:text-3xl font-bold">
+            D
           </div>
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+          <div className="flex flex-col gap-1 items-center justify-center">
+            <div className="text-center text-lg xl:text-xl font-bold text-white">
+              Sign in to DevTask Manager
+            </div>
+            <div className="text-center text-sm text-gray-400">
+              Welcome back, please sign in to continue
+            </div>
+          </div>
+        </div>
+        <div id="authentication" />
+        <div className="text-center mt-4">
+          <p className="text-sm text-gray-400">
+            Don't have an account?{' '}
+            <Link to="/signup" className="font-medium text-primary hover:text-accent">
+              Sign up
+            </Link>
+          </p>
         </div>
       </div>
     </div>
   );
-};
+}
 
 export default Login;

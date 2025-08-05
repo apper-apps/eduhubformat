@@ -15,26 +15,26 @@ function Login() {
   }, [isInitialized]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="w-full max-w-md space-y-8 p-8 bg-surface rounded-lg shadow-md border border-gray-600">
+    <div className="flex min-h-screen items-center justify-center bg-stone-50">
+      <div className="w-full max-w-md space-y-8 p-8 bg-white rounded-lg shadow-md border border-gray-200">
         <div className="flex flex-col gap-6 items-center justify-center">
-          <div className="w-14 h-14 shrink-0 rounded-xl flex items-center justify-center bg-gradient-to-r from-primary to-accent text-white text-2xl 2xl:text-3xl font-bold">
-            D
+          <div className="w-14 h-14 shrink-0 rounded-xl flex items-center justify-center bg-gradient-to-r from-primary-600 to-primary-800 text-white text-2xl 2xl:text-3xl font-bold">
+            E
           </div>
           <div className="flex flex-col gap-1 items-center justify-center">
-            <div className="text-center text-lg xl:text-xl font-bold text-white">
-              Sign in to DevTask Manager
+            <div className="text-center text-lg xl:text-xl font-bold text-gray-900">
+              Sign in to EduHub Pro
             </div>
-            <div className="text-center text-sm text-gray-400">
+            <div className="text-center text-sm text-gray-600">
               Welcome back, please sign in to continue
             </div>
           </div>
         </div>
         <div id="authentication" />
         <div className="text-center mt-4">
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-gray-600">
             Don't have an account?{' '}
-            <Link to="/signup" className="font-medium text-primary hover:text-accent">
+            <Link to="/signup" className="font-medium text-primary-600 hover:text-primary-800">
               Sign up
             </Link>
           </p>

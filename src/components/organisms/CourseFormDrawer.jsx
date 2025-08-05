@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
-import { createCourse, updateCourse } from "@/services/api/courseService";
+import { courseService } from "@/services/api/courseService";
 import ApperIcon from "@/components/ApperIcon";
 import Button from "@/components/atoms/Button";
 import { cn } from "@/utils/cn";
@@ -56,15 +56,15 @@ const CourseFormDrawer = ({
   useEffect(() => {
     if (editingCourse) {
       setFormData({
-        title: editingCourse.title || "",
+        title: editingCourse.title || editingCourse.Name || "",
         category: editingCourse.category || "",
-        image: editingCourse.image || "",
+        image: editingCourse.image || editingCourse.coverImage || "",
         description: editingCourse.description || "",
         introduction: editingCourse.introduction || editingCourse.intro_md || "",
         instructor: editingCourse.instructor || "",
         price: editingCourse.price?.toString() || "",
         currency: editingCourse.currency || "KRW",
-        difficulty: editingCourse.difficulty || "beginner",
+        difficulty: editingCourse.difficulty || editingCourse.level || "beginner",
         duration: editingCourse.duration?.toString() || "",
         sampleVideoId: editingCourse.sampleVideoId || "",
         objectives: editingCourse.objectives || [],
@@ -175,24 +175,34 @@ const CourseFormDrawer = ({
     try {
       setLoading(true);
       
+      // Map form data to Apper field names
       const courseData = {
-        ...formData,
-        price: formData.price ? Number(formData.price) : 0,
-        duration: formData.duration ? Number(formData.duration) : 0,
-        image: formData.image || '/api/placeholder/400/300',
+        Name: formData.title,
+        category: formData.category,
+        coverImage: formData.image || '/api/placeholder/400/300',
+        description: formData.description,
         intro_md: formData.introduction,
-        objectives: formData.objectives.filter(obj => obj.trim()),
-        curriculum: formData.curriculum.filter(item => item.title.trim())
+        instructor: formData.instructor,
+        price: formData.price ? Number(formData.price) : 0,
+        currency: formData.currency,
+        level: formData.difficulty,
+        duration: formData.duration ? Number(formData.duration) : 0,
+        sampleVideoId: formData.sampleVideoId,
+        objectives: JSON.stringify(formData.objectives.filter(obj => obj.trim())),
+        curriculum: JSON.stringify(formData.curriculum.filter(item => item.title.trim()))
       };
 
       if (editingCourse) {
-        await updateCourse(editingCourse.Id, courseData);
+        await courseService.update(editingCourse.Id, courseData);
         onCourseUpdated?.();
+        toast.success("강의가 성공적으로 수정되었습니다.");
       } else {
-        await createCourse(courseData);
+        await courseService.create(courseData);
         onCourseCreated?.();
+        toast.success("강의가 성공적으로 등록되었습니다.");
       }
     } catch (err) {
+      console.error("Error saving course:", err);
       toast.error(err.message || `강의 ${editingCourse ? '수정' : '등록'}에 실패했습니다.`);
     } finally {
       setLoading(false);

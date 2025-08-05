@@ -38,188 +38,507 @@ for (let i = 4; i <= 12; i++) {
 }
 let nextId = Math.max(...coursesData.map(course => course.Id)) + 1;
 
-export const getCourses = async (searchQuery = '', categoryFilter = '', priceRange = {}) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  let filteredCourses = [...courses];
-  
-  // Apply search filter
+class CourseService {
+  constructor() {
+    // Initialize ApperClient with Project ID and Public Key
+    const { ApperClient } = window.ApperSDK;
+    this.apperClient = new ApperClient({
+      apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+      apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+    });
+    this.tableName = 'course';
+  }
+
+  async getAll(searchQuery = '', categoryFilter = '', priceRange = {}) {
+    try {
+      const params = {
+        fields: [
+          { field: { Name: "Id" } },
+          { field: { Name: "Name" } },
+          { field: { Name: "title" } },
+          { field: { Name: "coverImage" } },
+          { field: { Name: "price" } },
+          { field: { Name: "cohort" } },
+          { field: { Name: "category" } },
+          { field: { Name: "instructor" } },
+          { field: { Name: "description" } },
+          { field: { Name: "duration" } },
+          { field: { Name: "students" } },
+          { field: { Name: "rating" } },
+          { field: { Name: "level" } },
+          { field: { Name: "createdAt" } },
+          { field: { Name: "intro_md" } },
+          { field: { Name: "introduction" } },
+          { field: { Name: "sampleVideoId" } },
+          { field: { Name: "objectives" } },
+          { field: { Name: "curriculum" } },
+          { field: { Name: "capacity" } },
+          { field: { Name: "enrolled" } },
+          { field: { Name: "spots_left" } },
+          { field: { Name: "Tags" } },
+          { field: { Name: "Owner" } }
+        ],
+        orderBy: [
+          {
+            fieldName: "createdAt",
+            sorttype: "DESC"
+          }
+        ]
+      };
+
+      // Add search filter
   if (searchQuery.trim()) {
-    filteredCourses = filteredCourses.filter(course => 
-      course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.instructor.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }
-  
-  // Apply category filter
+        params.where = [
+          {
+            FieldName: "title",
+            Operator: "Contains",
+            Values: [searchQuery]
+          }
+        ];
+      }
+
+      // Add category filter
   if (categoryFilter && categoryFilter !== '전체') {
-    filteredCourses = filteredCourses.filter(course => course.category === categoryFilter);
-  }
-  
-  // Apply price range filter
+        if (!params.where) params.where = [];
+        params.where.push({
+          FieldName: "category",
+          Operator: "EqualTo",
+          Values: [categoryFilter]
+        });
+      }
+
+      // Add price range filter
   if (priceRange.min !== undefined && priceRange.min !== '') {
-    filteredCourses = filteredCourses.filter(course => course.price >= parseInt(priceRange.min));
+        if (!params.where) params.where = [];
+        params.where.push({
+          FieldName: "price",
+          Operator: "GreaterThanOrEqualTo",
+          Values: [parseFloat(priceRange.min)]
+        });
   }
   if (priceRange.max !== undefined && priceRange.max !== '') {
-    filteredCourses = filteredCourses.filter(course => course.price <= parseInt(priceRange.max));
-  }
-  
-  return filteredCourses;
-};
+        if (!params.where) params.where = [];
+        params.where.push({
+          FieldName: "price",
+          Operator: "LessThanOrEqualTo",
+          Values: [parseFloat(priceRange.max)]
+        });
+      }
 
-export const getCourseById = async (id) => {
-  // Validate ID is integer
-  if (!Number.isInteger(id) || id <= 0) {
-    throw new Error('유효하지 않은 강의 ID입니다.');
+      const response = await this.apperClient.fetchRecords(this.tableName, params);
+
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      // Handle empty results
+      if (!response.data || response.data.length === 0) {
+        return [];
+      }
+
+      // Map database fields to UI format
+      return response.data.map(course => ({
+        Id: course.Id,
+        title: course.title || course.Name || "",
+        coverImage: course.coverImage || "",
+        price: course.price || 0,
+        cohort: course.cohort || "",
+        category: course.category || "",
+        instructor: course.instructor || "",
+        description: course.description || "",
+        duration: course.duration || "",
+        students: course.students || 0,
+        rating: course.rating || 0,
+        level: course.level || "초급",
+        createdAt: course.createdAt || course.CreatedOn || new Date().toISOString(),
+        intro_md: course.intro_md || "",
+        introduction: course.introduction || course.description || "",
+        sampleVideoId: course.sampleVideoId || "",
+        objectives: course.objectives ? JSON.parse(course.objectives) : [],
+        curriculum: course.curriculum ? JSON.parse(course.curriculum) : [],
+        capacity: course.capacity || 30,
+        enrolled: course.enrolled || 0,
+        spots_left: course.spots_left || (course.capacity - course.enrolled),
+        tags: course.Tags || "",
+        owner: course.Owner || null
+      }));
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error fetching courses:", error?.response?.data?.message);
+      } else {
+        console.error("Error fetching courses:", error.message);
+      }
+      return [];
+    }
   }
-  
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  const course = courses.find(course => course.Id === id);
-  
-  if (!course) {
-    throw new Error('강의를 찾을 수 없습니다.');
+
+  async getById(id) {
+    try {
+      if (!id) {
+        throw new Error("Course ID is required");
+      }
+
+      const params = {
+        fields: [
+          { field: { Name: "Id" } },
+          { field: { Name: "Name" } },
+          { field: { Name: "title" } },
+          { field: { Name: "coverImage" } },
+          { field: { Name: "price" } },
+          { field: { Name: "cohort" } },
+          { field: { Name: "category" } },
+          { field: { Name: "instructor" } },
+          { field: { Name: "description" } },
+          { field: { Name: "duration" } },
+          { field: { Name: "students" } },
+          { field: { Name: "rating" } },
+          { field: { Name: "level" } },
+          { field: { Name: "createdAt" } },
+          { field: { Name: "intro_md" } },
+          { field: { Name: "introduction" } },
+          { field: { Name: "sampleVideoId" } },
+          { field: { Name: "objectives" } },
+          { field: { Name: "curriculum" } },
+          { field: { Name: "capacity" } },
+          { field: { Name: "enrolled" } },
+          { field: { Name: "spots_left" } },
+          { field: { Name: "Tags" } },
+          { field: { Name: "Owner" } }
+        ]
+      };
+
+      const response = await this.apperClient.getRecordById(this.tableName, id, params);
+
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (!response.data) {
+        throw new Error(`Course not found with ID: ${id}`);
+      }
+
+      const course = response.data;
+      
+      // Map database fields to UI format
+      return {
+        Id: course.Id,
+        title: course.title || course.Name || "",
+        coverImage: course.coverImage || "",
+        price: course.price || 0,
+        cohort: course.cohort || "",
+        category: course.category || "",
+        instructor: course.instructor || "",
+        description: course.description || "",
+        duration: course.duration || "",
+        students: course.students || 0,
+        rating: course.rating || 0,
+        level: course.level || "초급",
+        createdAt: course.createdAt || course.CreatedOn || new Date().toISOString(),
+        intro_md: course.intro_md || "",
+        introduction: course.introduction || course.description || "",
+        sampleVideoId: course.sampleVideoId || "",
+        objectives: course.objectives ? JSON.parse(course.objectives) : [],
+        curriculum: course.curriculum ? JSON.parse(course.curriculum) : [],
+        capacity: course.capacity || 30,
+        enrolled: course.enrolled || 0,
+        spots_left: course.spots_left || (course.capacity - course.enrolled),
+        tags: course.Tags || "",
+        owner: course.Owner || null
+      };
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error(`Error fetching course with ID ${id}:`, error?.response?.data?.message);
+      } else {
+        console.error(`Error fetching course with ID ${id}:`, error.message);
+      }
+      throw error;
+    }
   }
-  
-  return { ...course };
-};
+
+  async create(courseData) {
+    try {
+      // Only include Updateable fields
+      const params = {
+        records: [
+          {
+            Name: courseData.title || "",
+            title: courseData.title || "",
+            coverImage: courseData.coverImage || "",
+            price: courseData.price || 0,
+            cohort: courseData.cohort || "",
+            category: courseData.category || "",
+            instructor: courseData.instructor || "",
+            description: courseData.description || "",
+            duration: courseData.duration || "",
+            students: courseData.students || 0,
+            rating: courseData.rating || 0,
+            level: courseData.level || "초급",
+            createdAt: new Date().toISOString(),
+            intro_md: courseData.intro_md || courseData.introduction || "",
+            introduction: courseData.introduction || courseData.intro_md || courseData.description || "",
+            sampleVideoId: courseData.sampleVideoId || "",
+            objectives: courseData.objectives ? JSON.stringify(courseData.objectives) : "",
+            curriculum: courseData.curriculum ? JSON.stringify(courseData.curriculum) : "",
+            capacity: courseData.capacity || 30,
+            enrolled: courseData.enrolled || 0,
+            spots_left: courseData.spots_left || (courseData.capacity - courseData.enrolled),
+            Tags: courseData.tags || "",
+            Owner: courseData.owner || null
+          }
+        ]
+      };
+
+      const response = await this.apperClient.createRecord(this.tableName, params);
+
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const successfulRecords = response.results.filter(result => result.success);
+        const failedRecords = response.results.filter(result => !result.success);
+
+        if (failedRecords.length > 0) {
+          console.error(`Failed to create course ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+
+          failedRecords.forEach(record => {
+            record.errors?.forEach(error => {
+              throw new Error(`${error.fieldLabel}: ${error.message}`);
+            });
+            if (record.message) throw new Error(record.message);
+          });
+        }
+        
+        if (successfulRecords.length > 0) {
+          const course = successfulRecords[0].data;
+          // Map database fields to UI format
+          return {
+            Id: course.Id,
+            title: course.title || course.Name || "",
+            coverImage: course.coverImage || "",
+            price: course.price || 0,
+            cohort: course.cohort || "",
+            category: course.category || "",
+            instructor: course.instructor || "",
+            description: course.description || "",
+            duration: course.duration || "",
+            students: course.students || 0,
+            rating: course.rating || 0,
+            level: course.level || "초급",
+            createdAt: course.createdAt || course.CreatedOn || new Date().toISOString(),
+            intro_md: course.intro_md || "",
+            introduction: course.introduction || course.description || "",
+            sampleVideoId: course.sampleVideoId || "",
+            objectives: course.objectives ? JSON.parse(course.objectives) : [],
+            curriculum: course.curriculum ? JSON.parse(course.curriculum) : [],
+            capacity: course.capacity || 30,
+            enrolled: course.enrolled || 0,
+            spots_left: course.spots_left || (course.capacity - course.enrolled),
+            tags: course.Tags || "",
+            owner: course.Owner || null
+          };
+        }
+      }
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error creating course:", error?.response?.data?.message);
+      } else {
+        console.error("Error creating course:", error.message);
+      }
+      throw error;
+    }
+  }
+
+  async update(id, courseData) {
+    try {
+      if (!id) {
+        throw new Error("Course ID is required");
+      }
+
+      // Only include Updateable fields
+      const params = {
+        records: [
+          {
+            Id: parseInt(id),
+            Name: courseData.title || "",
+            title: courseData.title || "",
+            coverImage: courseData.coverImage || "",
+            price: courseData.price || 0,
+            cohort: courseData.cohort || "",
+            category: courseData.category || "",
+            instructor: courseData.instructor || "",
+            description: courseData.description || "",
+            duration: courseData.duration || "",
+            students: courseData.students || 0,
+            rating: courseData.rating || 0,
+            level: courseData.level || "초급",
+            intro_md: courseData.intro_md || courseData.introduction || "",
+            introduction: courseData.introduction || courseData.intro_md || courseData.description || "",
+            sampleVideoId: courseData.sampleVideoId || "",
+            objectives: courseData.objectives ? JSON.stringify(courseData.objectives) : "",
+            curriculum: courseData.curriculum ? JSON.stringify(courseData.curriculum) : "",
+            capacity: courseData.capacity || 30,
+            enrolled: courseData.enrolled || 0,
+            spots_left: courseData.spots_left || (courseData.capacity - courseData.enrolled),
+            Tags: courseData.tags || "",
+            Owner: courseData.owner || null
+          }
+        ]
+      };
+
+      const response = await this.apperClient.updateRecord(this.tableName, params);
+
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const successfulUpdates = response.results.filter(result => result.success);
+        const failedUpdates = response.results.filter(result => !result.success);
+
+        if (failedUpdates.length > 0) {
+          console.error(`Failed to update course ${failedUpdates.length} records:${JSON.stringify(failedUpdates)}`);
+
+          failedUpdates.forEach(record => {
+            record.errors?.forEach(error => {
+              throw new Error(`${error.fieldLabel}: ${error.message}`);
+            });
+            if (record.message) throw new Error(record.message);
+          });
+        }
+
+        if (successfulUpdates.length > 0) {
+          const course = successfulUpdates[0].data;
+          // Map database fields to UI format
+    return {
+            Id: course.Id,
+            title: course.title || course.Name || "",
+            coverImage: course.coverImage || "",
+            price: course.price || 0,
+            cohort: course.cohort || "",
+            category: course.category || "",
+            instructor: course.instructor || "",
+            description: course.description || "",
+            duration: course.duration || "",
+            students: course.students || 0,
+            rating: course.rating || 0,
+            level: course.level || "초급",
+            createdAt: course.createdAt || course.CreatedOn || new Date().toISOString(),
+            intro_md: course.intro_md || "",
+            introduction: course.introduction || course.description || "",
+            sampleVideoId: course.sampleVideoId || "",
+            objectives: course.objectives ? JSON.parse(course.objectives) : [],
+            curriculum: course.curriculum ? JSON.parse(course.curriculum) : [],
+            capacity: course.capacity || 30,
+            enrolled: course.enrolled || 0,
+            spots_left: course.spots_left || (course.capacity - course.enrolled),
+            tags: course.Tags || "",
+            owner: course.Owner || null
+          };
+        }
+      }
+  } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error updating course:", error?.response?.data?.message);
+      } else {
+        console.error("Error updating course:", error.message);
+      }
+      throw error;
+    }
+  }
+
+  async delete(id) {
+    try {
+      if (!id) {
+        throw new Error("Course ID is required for deletion");
+      }
+
+      const params = {
+        RecordIds: [parseInt(id)]
+      };
+
+      const response = await this.apperClient.deleteRecord(this.tableName, params);
+
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const successfulDeletions = response.results.filter(result => result.success);
+        const failedDeletions = response.results.filter(result => !result.success);
+
+        if (failedDeletions.length > 0) {
+          console.error(`Failed to delete course ${failedDeletions.length} records:${JSON.stringify(failedDeletions)}`);
+
+          failedDeletions.forEach(record => {
+            if (record.message) throw new Error(record.message);
+          });
+        }
+
+        return successfulDeletions.length > 0;
+      }
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error deleting course:", error?.response?.data?.message);
+      } else {
+        console.error("Error deleting course:", error.message);
+      }
+      throw error;
+    }
+  }
+
+  // Backward compatibility methods
+  async getCourses(searchQuery = '', categoryFilter = '', priceRange = {}) {
+    return this.getAll(searchQuery, categoryFilter, priceRange);
+  }
+
+  async getCourseById(id) {
+    return this.getById(id);
+  }
+
+  async createCourse(courseData) {
+    return this.create(courseData);
+  }
+
+  async updateCourse(id, courseData) {
+    return this.update(id, courseData);
+  }
+
+  async deleteCourse(id) {
+    return this.delete(id);
+  }
+}
+
+export const courseService = new CourseService();
+
+// Export individual functions for backward compatibility
+export const getCourses = (searchQuery = '', categoryFilter = '', priceRange = {}) => 
+  courseService.getCourses(searchQuery, categoryFilter, priceRange);
+
+export const getCourseById = (id) => 
+  courseService.getCourseById(id);
+
+export const createCourse = (courseData) => 
+  courseService.createCourse(courseData);
+
+export const updateCourse = (id, courseData) => 
+  courseService.updateCourse(id, courseData);
+
+export const deleteCourse = (id) => 
+  courseService.deleteCourse(id);
+
+// Import cohort service for cohort-related functions
+import { cohortService } from './cohortService.js';
 
 export const getCohorts = async (courseId) => {
-  // Validate ID is integer
-  if (!Number.isInteger(courseId) || courseId <= 0) {
-    throw new Error('유효하지 않은 강의 ID입니다.');
-  }
-  
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 200));
-  
-const cohorts = cohortsByCourse[courseId] || [];
-  
-  // Add spots_left calculation to each cohort
-  const cohortsWithSpotsLeft = cohorts.map(cohort => ({
-    ...cohort,
-    spots_left: cohort.capacity - cohort.enrolled
-  }));
-  
-  return [...cohortsWithSpotsLeft];
+  return cohortService.getByCourseId(courseId);
 };
 
 export const updateCohortEnrollment = async (courseId, cohortId, increment = 1) => {
-  if (!Number.isInteger(courseId) || courseId <= 0) {
-    throw new Error('유효하지 않은 강의 ID입니다.');
-  }
-  
-  try {
-    // Initialize Apper SDK if not already done
-    if (!window.Apper) {
-      throw new Error('Apper SDK가 로드되지 않았습니다.');
-    }
-
-    await window.Apper.init({
-      projectId: import.meta.env.VITE_APPER_PROJECT_ID,
-      publicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
-    });
-
-    // Get cohort from Apper Collections
-    const cohorts = await window.Apper.collection('Cohorts').find({
-      where: { id: cohortId }
-    });
-    
-    if (cohorts.length === 0) {
-      throw new Error('해당 기수를 찾을 수 없습니다.');
-    }
-
-    const cohort = cohorts[0];
-    const newEnrolledCount = (cohort.enrolled || 0) + increment;
-    
-    // Update enrollment count in Apper Collections
-    await window.Apper.collection('Cohorts').update(cohortId, {
-      enrolled: newEnrolledCount
-    });
-    
-    return {
-      ...cohort,
-      enrolled: newEnrolledCount
-    };
-  } catch (error) {
-    throw new Error('기수 정보 업데이트 중 오류가 발생했습니다: ' + error.message);
-  }
-};
-
-export const createCourse = async (courseData) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-const newCourse = {
-    ...courseData,
-    Id: nextId++,
-    createdAt: new Date().toISOString(),
-    // Ensure curriculum has proper structure
-    curriculum: courseData.curriculum || [],
-    objectives: courseData.objectives || [],
-    introduction: courseData.introduction || courseData.description || ''
-  };
-  
-  courses.push(newCourse);
-  return { ...newCourse };
-};
-
-export const updateCourse = async (id, courseData) => {
-// Validate ID is integer
-  if (!Number.isInteger(id) || id <= 0) {
-    throw new Error('유효하지 않은 강의 ID입니다.');
-  }
-  
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  const index = courses.findIndex(course => course.Id === id);
-  
-  if (index === -1) {
-    throw new Error('강의를 찾을 수 없습니다.');
-  }
-  
-  // Upsert logic - preserve curriculum order and update changed items
-  const existingCourse = courses[index];
-  const updatedCurriculum = courseData.curriculum || existingCourse.curriculum || [];
-  const updatedObjectives = courseData.objectives || existingCourse.objectives || [];
-  
-  courses[index] = {
-    ...existingCourse,
-    ...courseData,
-    Id: id, // Ensure ID cannot be changed
-    // Preserve arrays with proper structure
-    curriculum: updatedCurriculum,
-    objectives: updatedObjectives,
-    // Support both intro_md and introduction fields
-    intro_md: courseData.intro_md || courseData.introduction || existingCourse.intro_md || existingCourse.introduction || existingCourse.description || '',
-    introduction: courseData.introduction || courseData.intro_md || existingCourse.introduction || existingCourse.intro_md || existingCourse.description || '',
-    description: courseData.description || courseData.introduction || courseData.intro_md || existingCourse.description || existingCourse.introduction || ''
-  };
-  
-  return { ...courses[index] };
-};
-
-export const deleteCourse = async (id) => {
-  // Validate ID is integer
-  if (!Number.isInteger(id) || id <= 0) {
-    throw new Error('유효하지 않은 강의 ID입니다.');
-  }
-  
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  const index = courses.findIndex(course => course.Id === id);
-  
-  if (index === -1) {
-    throw new Error('강의를 찾을 수 없습니다.');
-  }
-  
-const deletedCourse = courses[index];
-  courses.splice(index, 1);
-  
-  return { ...deletedCourse };
+  return cohortService.updateEnrollment(cohortId, increment);
 };

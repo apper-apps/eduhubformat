@@ -3,7 +3,8 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { toast } from "react-toastify";
 import { formatPrice } from "@/services/api/orderService";
 import { enrollInCourse } from "@/services/api/enrollmentService";
-import { getCourseById, getCohorts } from "@/services/api/courseService";
+import { courseService } from "@/services/api/courseService";
+import { cohortService } from "@/services/api/cohortService";
 import { getRelatedCourses } from "@/services/api/recommendationService";
 import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
@@ -71,13 +72,13 @@ const copyToClipboard = async (course) => {
 const CourseDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-const [course, setCourse] = useState(null);
+  const [course, setCourse] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-const [cohorts, setCohorts] = useState([]);
+  const [cohorts, setCohorts] = useState([]);
   const [showCohortModal, setShowCohortModal] = useState(false);
   const [showEnrollmentModal, setShowEnrollmentModal] = useState(false);
-const [selectedCohort, setSelectedCohort] = useState(null);
+  const [selectedCohort, setSelectedCohort] = useState(null);
   const [openWeeks, setOpenWeeks] = useState(new Set());
   const [loadedVideos, setLoadedVideos] = useState(new Set());
   const [isEnrolling, setIsEnrolling] = useState(false);
@@ -87,15 +88,19 @@ const [selectedCohort, setSelectedCohort] = useState(null);
   const [recommendationsLoading, setRecommendationsLoading] = useState(true);
   const [searchParams] = useSearchParams();
   const isOwned = searchParams.get('owned') === 'true';
-useEffect(() => {
+
+  useEffect(() => {
     const loadCourse = async () => {
       try {
         setIsLoading(true);
         setError(null);
+        
+        // Use Apper-SDK services to fetch course and cohorts
         const [courseData, cohortsData] = await Promise.all([
-          getCourseById(parseInt(id)),
-          getCohorts(parseInt(id))
+          courseService.getById(parseInt(id)),
+          cohortService.getByCourseId(parseInt(id))
         ]);
+        
         setCourse(courseData);
         setCohorts(cohortsData);
         
@@ -106,7 +111,8 @@ useEffect(() => {
           setEnrollmentLoading(false);
         }
       } catch (err) {
-        setError(err.message);
+        setError(err.message || "강의를 불러오는데 실패했습니다.");
+        console.error("Error loading course:", err);
       } finally {
         setIsLoading(false);
       }
@@ -115,7 +121,7 @@ useEffect(() => {
     const loadRecommendations = async () => {
       try {
         setRecommendationsLoading(true);
-const coursesData = await getRelatedCourses(id);
+        const coursesData = await getRelatedCourses(id);
         setRelatedCourses(coursesData);
       } catch (err) {
         console.error('Failed to load recommendations:', err);
@@ -123,9 +129,10 @@ const coursesData = await getRelatedCourses(id);
         setRecommendationsLoading(false);
       }
     };
-loadCourse();
+
+    loadCourse();
     loadRecommendations();
-  }, [id]);
+  }, [id, isOwned]);
 
   // Add accordion functionality
   useEffect(() => {
@@ -160,30 +167,24 @@ loadCourse();
     };
   }, [course]);
 
-const loadUserEnrollment = async (courseId) => {
+  const loadUserEnrollment = async (courseId) => {
     try {
       setEnrollmentLoading(true);
       
       // Initialize Apper SDK if needed
-      if (!window.Apper) {
-        const script = document.createElement('script');
-        script.src = import.meta.env.VITE_APPER_SDK_CDN_URL;
-        script.async = true;
-        document.head.appendChild(script);
-        
-        await new Promise((resolve, reject) => {
-          script.onload = resolve;
-          script.onerror = reject;
-        });
+      if (!window.ApperSDK) {
+        console.warn('ApperSDK not available');
+        return;
       }
 
-      await window.Apper.init({
-        projectId: import.meta.env.VITE_APPER_PROJECT_ID,
-        publicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      const { ApperClient } = window.ApperSDK;
+      const client = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
       });
 
       // Find user's enrollment for this course
-      const enrollments = await window.Apper.collection('Enrollments').find({
+      const enrollments = await client.fetchRecords('enrollment', {
         where: {
           user_id: 1, // Current user ID (hardcoded for demo)
           course_id: courseId
@@ -268,12 +269,12 @@ const handleEnrollConfirm = async () => {
       setShowEnrollmentModal(false);
       setSelectedCohort(null);
       
-      // Refresh cohorts and user enrollment data
-      const updatedCohorts = await getCohorts(course.Id);
+      // Refresh cohorts and user enrollment data using Apper-SDK services
+      const updatedCohorts = await cohortService.getByCourseId(course.Id);
       setCohorts(updatedCohorts);
       await loadUserEnrollment(course.Id);
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err.message || "수강 신청에 실패했습니다.");
     } finally {
       setIsEnrolling(false);
     }

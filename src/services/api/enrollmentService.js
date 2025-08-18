@@ -118,65 +118,113 @@ export const enrollInCourse = async (courseId, cohortId, userId = 1) => {
     throw new Error('유효하지 않은 기수 ID입니다.');
   }
   
-  try {
-    // Initialize Apper SDK if not already done
-    if (!window.Apper) {
-      throw new Error('Apper SDK가 로드되지 않았습니다.');
+try {
+    // Initialize ApperClient with Project ID and Public Key
+    const { ApperClient } = window.ApperSDK;
+    if (!ApperClient) {
+      throw new Error('ApperSDK가 로드되지 않았습니다.');
     }
 
-    await window.Apper.init({
-      projectId: import.meta.env.VITE_APPER_PROJECT_ID,
-      publicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+    const apperClient = new ApperClient({
+      apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+      apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
     });
-// Check if already enrolled using Apper Collections
-    const existingEnrollments = await window.Apper.collection('Enrollments').find({
-      where: {
-        cohort_id: cohortId,
-        user_id: userId
-      }
-    });
+
+    // Check if already enrolled using ApperClient
+    const existingEnrollmentsParams = {
+      fields: [
+        { field: { Name: "Id" } },
+        { field: { Name: "cohort_id" } },
+        { field: { Name: "user_id" } }
+      ],
+      where: [
+        {
+          FieldName: "cohort_id",
+          Operator: "EqualTo",
+          Values: [cohortId]
+        },
+        {
+          FieldName: "user_id", 
+          Operator: "EqualTo",
+          Values: [userId]
+        }
+      ]
+    };
     
-    if (existingEnrollments.length > 0) {
+    const existingResponse = await apperClient.fetchRecords('enrollment', existingEnrollmentsParams);
+    
+    if (existingResponse.success && existingResponse.data.length > 0) {
       throw new Error('이미 해당 기수에 등록되어 있습니다.');
     }
 
     // Get current cohort data
-    const cohorts = await window.Apper.collection('Cohorts').find({
-      where: { id: cohortId }
-    });
+    const cohortParams = {
+      fields: [
+        { field: { Name: "Id" } },
+        { field: { Name: "capacity" } },
+        { field: { Name: "enrolled" } }
+      ]
+    };
     
-    if (cohorts.length === 0) {
+    const cohortResponse = await apperClient.getRecordById('cohort', cohortId, cohortParams);
+    
+    if (!cohortResponse.success || !cohortResponse.data) {
       throw new Error('해당 기수를 찾을 수 없습니다.');
     }
 
-    const cohort = cohorts[0];
+    const cohort = cohortResponse.data;
     
     // Determine enrollment status based on capacity
     const currentEnrolled = cohort.enrolled || 0;
     const status = currentEnrolled < cohort.capacity ? 'enrolled' : 'waitlist';
     
-    // Create new enrollment in Apper Collections
-const newEnrollment = await window.Apper.collection('Enrollments').create({
-      cohort_id: cohortId,
-      course_id: courseId,
-      user_id: userId,
-      status: status,
-      created_at: new Date().toISOString()
-    });
+    // Create new enrollment
+    const enrollmentParams = {
+      records: [
+        {
+          cohort_id: cohortId,
+          course_id: courseId,
+          user_id: userId,
+          status: status,
+          created_at: new Date().toISOString()
+        }
+      ]
+    };
+
+    const enrollmentResponse = await apperClient.createRecord('enrollment', enrollmentParams);
+    
+    if (!enrollmentResponse.success) {
+      throw new Error(enrollmentResponse.message);
+    }
+
+    let newEnrollment = null;
+    if (enrollmentResponse.results && enrollmentResponse.results.length > 0) {
+      const successfulRecords = enrollmentResponse.results.filter(result => result.success);
+      if (successfulRecords.length > 0) {
+        newEnrollment = successfulRecords[0].data;
+      }
+    }
+
     // Update cohort enrollment count only if successfully enrolled (not waitlisted)
-    if (status === 'enrolled') {
-      await window.Apper.collection('Cohorts').update(cohortId, {
-        enrolled: currentEnrolled + 1
-      });
+    if (status === 'enrolled' && newEnrollment) {
+      const updateParams = {
+        records: [
+          {
+            Id: parseInt(cohortId),
+            enrolled: currentEnrolled + 1
+          }
+        ]
+      };
+      await apperClient.updateRecord('cohort', updateParams);
     }
     
     return {
-      Id: newEnrollment.id,
+      Id: newEnrollment?.Id || Date.now(),
       courseId,
       cohortId,
       userId,
       status,
-      enrolledAt: newEnrollment.created_at
+      enrolledAt: newEnrollment?.created_at || new Date().toISOString()
     };
   } catch (error) {
     throw new Error('수강신청 중 오류가 발생했습니다: ' + error.message);
